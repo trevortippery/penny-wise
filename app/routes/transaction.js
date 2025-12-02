@@ -4,58 +4,155 @@ const router = express.Router();
 const transactionsList = [];
 
 router.post("/", (req, res) => {
-  const newTransaction = {
-    id: transactionsList.length + 1,
-    user_id: req.body.user_id,
-    amount: req.body.amount,
-    type: req.body.type,
-    category_id: req.body.category_id,
-    description: req.body.description,
-    date: req.body.date,
-    created_at: new Date().toISOString()
-  };
+  try {
+    const { userId, amount, date, type, categoryId, description } = req.body;
 
-  transactionsList.push(newTransaction);
-  res.status(201).json(newTransaction);
-});
+    if (!userId) {
+      return res.status(400).json({error: "User id is required"});
+    }
 
-router.put("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = transactionsList.findIndex(t => t.id === id);
+    if (!amount) {
+      return res.status(400).json({error: "Amount for transaction is required"});
+    }
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Transaction not found" });
+    if (typeof amount !== 'number' || amount === 0) {
+      return res.status(400).json({error: "Amount must be a non-zero number"});
+    }
+
+    if (!date) {
+      return res.status(400).json({error: "Date is required for transaction"});
+    }
+
+    if (isNaN(Date.parse(date))) {
+      return res.status(400).json({error: "Invalid date format"});
+    }
+
+    if (!type) {
+      return res.status(400).json({error: "Transaction type is required"});
+    }
+
+    const newTransaction = {
+      id: transactionsList.length + 1,
+      userId: userId,
+      amount: amount,
+      type: type,
+      categoryId: categoryId || null,
+      description: description || "",
+      date: date,
+      createdAt: new Date().toISOString()
+    };
+
+    transactionsList.push(newTransaction);
+    res.status(201).json(newTransaction);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({error: "Internal server error"});
   }
-
-  transactionsList[index] = { ...transactionsList[index], ...req.body };
-  res.status(200).json(transactionsList[index]);
-});
-
-router.delete("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = transactionsList.findIndex(t => t.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ message: "Transaction not found" });
-  }
-
-  transactionsList.splice(index, 1);
-  res.status(200).json({ message: "Transaction deleted" });
 });
 
 router.get("/", (req, res) => {
-  res.status(200).json(transactionsList);
+  try {
+    const { userId } = req.query;
+
+    if (userId) {
+      const userTransactions = transactionsList.filter(t => t.userId === parseInt(userId));
+      return res.status(200).json(userTransactions);
+    }
+
+    res.status(200).json(transactionsList);
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.get("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const transaction = transactionsList.find(t => t.id === id);
+  try {
+    const id = parseInt(req.params.id);
 
-  if (!transaction) {
-    return res.status(404).json({ message: "Transaction not found" });
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid transaction ID" });
+    }
+
+    const transaction = transactionsList.find(t => t.id === id);
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    res.status(200).json(transaction);
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
   }
+});
 
-  res.status(200).json(transaction);
+router.put("/:id", (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid transaction ID" });
+    }
+
+    const index = transactionsList.findIndex(t => t.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    const { id: _, userId: __, createdAt: ___, ...allowedUpdates } = req.body;
+
+    if (allowedUpdates.amount !== undefined) {
+      if (typeof allowedUpdates.amount !== 'number' || allowedUpdates.amount === 0) {
+        return res.status(400).json({ error: "Amount must be a non-zero number" });
+      }
+    }
+
+    if (allowedUpdates.date !== undefined) {
+      if (isNaN(Date.parse(allowedUpdates.date))) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+    }
+
+    transactionsList[index] = {
+      ...transactionsList[index],
+      ...allowedUpdates
+    };
+
+    res.status(200).json(transactionsList[index]);
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/:id", (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid transaction ID" });
+    }
+
+    const index = transactionsList.findIndex(t => t.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    const deletedTransaction = transactionsList[index];
+    transactionsList.splice(index, 1);
+
+    res.status(200).json({
+      message: "Transaction deleted successfully",
+      transaction: deletedTransaction
+    });
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;

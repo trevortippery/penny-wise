@@ -16,38 +16,37 @@ async function comparePasswords(password, hashedPassword) {
 const users = [];
 
 router.post("/register", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || email.trim() === "") {
-    res.status(400).json({error: "Email is required"});
-    return;
-  }
-
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if(!emailRegex.test(email)) {
-    res.status(400).json({error: "Invalid email format"});
-    return;
-  }
-
-  if(users.find(user => user.email === email)) {
-    res.status(400).json({error: "Email already exists"});
-    return;
-  }
-
-  if (!password || password.trim() === "") {
-    res.status(400).json({error: "Password is required"});
-    return;
-  }
-
   try {
-    const hashed = await hashPassword(req.body.password);
+    const { email, password } = req.body;
 
+    if (!email || email.trim() === "") {
+      res.status(400).json({error: "Email is required"});
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(!emailRegex.test(email)) {
+      res.status(400).json({error: "Invalid email format"});
+      return;
+    }
+
+    if(users.find(user => user.email === email)) {
+      res.status(400).json({error: "Email already exists"});
+      return;
+    }
+
+    if (!password || password.trim() === "") {
+      res.status(400).json({error: "Password is required"});
+      return;
+    }
+
+    const hashed = await hashPassword(req.body.password);
     const newUser = {
       id: users.length + 1,
       email: req.body.email,
-      password_hash: hashed,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      passwordHash: hashed,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
 
     users.push(newUser);
@@ -61,25 +60,25 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || email.trim() === "") {
-    res.status(400).json({error: "Email is required"});
-    return;
-  }
-
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if(!emailRegex.test(email)) {
-    res.status(400).json({error: "Invalid email format"});
-    return;
-  }
-
-  if (!password || password.trim() === "") {
-    res.status(400).json({error: "Password is required"});
-    return;
-  }
-
   try {
+    const { email, password } = req.body;
+
+    if (!email || email.trim() === "") {
+      res.status(400).json({error: "Email is required"});
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(!emailRegex.test(email)) {
+      res.status(400).json({error: "Invalid email format"});
+      return;
+    }
+
+    if (!password || password.trim() === "") {
+      res.status(400).json({error: "Password is required"});
+      return;
+    }
+
     const potentialUser = users.find(user => user.email === email);
 
     if (!potentialUser) {
@@ -87,7 +86,7 @@ router.post("/login", async (req, res) => {
       return;
     }
 
-    const comparison = await comparePasswords(password, potentialUser.password_hash);
+    const comparison = await comparePasswords(password, potentialUser.passwordHash);
 
     if (!comparison) {
       res.status(401).json({error: "Invalid credentials"});
