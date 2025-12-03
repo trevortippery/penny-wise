@@ -13,7 +13,7 @@ async function comparePasswords(password, hashedPassword) {
   return match;
 }
 
-const users = [];
+// const users = [];
 
 router.post("/register", async (req, res) => {
   try {
@@ -30,7 +30,8 @@ router.post("/register", async (req, res) => {
       return;
     }
 
-    if(users.find(user => user.email === email)) {
+    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (rows.length > 0) {
       res.status(400).json({error: "Email already exists"});
       return;
     }
@@ -41,16 +42,11 @@ router.post("/register", async (req, res) => {
     }
 
     const hashed = await hashPassword(req.body.password);
-    const newUser = {
-      id: users.length + 1,
-      email: req.body.email,
-      passwordHash: hashed,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+    const query2 = "INSERT INTO users(email, password_hash, updated_at) VALUES($1, $2, NOW()) RETURNING id, email, created_at";
+    const values = [email, hashed];
+    const result = await pool.query(query2, values);
 
-    users.push(newUser);
-    res.status(201).json({message: "User created successfully"});
+    res.status(201).json({message: "User created successfully", user: result.rows[0]});
 
   } catch(err) {
     console.log(err);
@@ -79,14 +75,14 @@ router.post("/login", async (req, res) => {
       return;
     }
 
-    const potentialUser = users.find(user => user.email === email);
+    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
-    if (!potentialUser) {
+    if (rows.length === 0) {
       res.status(401).json({error: "Invalid credentials"});
       return;
     }
 
-    const comparison = await comparePasswords(password, potentialUser.passwordHash);
+    const comparison = await comparePasswords(password, rows[0].password_hash);
 
     if (!comparison) {
       res.status(401).json({error: "Invalid credentials"});
@@ -101,14 +97,26 @@ router.post("/login", async (req, res) => {
 
 });
 
-router.get("/users/:id", (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  if (!user) {
-    res.status(404).json({error: "User not found"});
-    return;
-  }
+router.get("/users/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
 
-  res.status(200).json(user);
+    if (isNaN(id)) {
+      res.status(400).json({error: "Invalid user ID"});
+      return;
+    }
+
+    const { rows } = await pool.query("SELECT id, email, created_at, updated_at FROM users WHERE id = $1", [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({error: "User not found"});
+    }
+
+    res.status(200).json({user: rows[0]});
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({error: "Internal server error"});
+  }
 });
 
 module.exports = router;

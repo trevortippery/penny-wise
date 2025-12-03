@@ -1,9 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const pool = require("../../db/db");
 
-const transactionsList = [];
+const Transactions = {
+  DEPOSIT: 'deposit',
+  WITHDRAW: 'withdraw'
+}
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { userId, amount, date, type, categoryId, description } = req.body;
 
@@ -31,19 +35,24 @@ router.post("/", (req, res) => {
       return res.status(400).json({error: "Transaction type is required"});
     }
 
-    const newTransaction = {
-      id: transactionsList.length + 1,
-      userId: userId,
-      amount: amount,
-      type: type,
-      categoryId: categoryId || null,
-      description: description || "",
-      date: date,
-      createdAt: new Date().toISOString()
-    };
+    if (type !== Transactions.DEPOSIT && type !== Transactions.WITHDRAW) {
+      return res.status(400).json({error: "Invalid type of transaction"});
+    }
 
-    transactionsList.push(newTransaction);
-    res.status(201).json(newTransaction);
+    if (!categoryId) {
+      return res.status(400).json({error: "Category ID is required"});
+    }
+
+    if (typeof categoryId !== 'number') {
+      return res.status(400).json({error: "Category ID must be a number"});
+    }
+
+    const { rows } = await pool.query(
+      "INSERT INTO transactions(user_id, amount, type, category_id, description, date) VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
+      [userId, amount, type, categoryId, description || null, date]
+    );
+
+    res.status(201).json({message: "Transaction created successfully", transaction: rows[0]});
 
   } catch(err) {
     console.log(err);
@@ -51,23 +60,36 @@ router.post("/", (req, res) => {
   }
 });
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { userId } = req.query;
 
-    if (userId) {
-      const userTransactions = transactionsList.filter(t => t.userId === parseInt(userId));
-      return res.status(200).json(userTransactions);
+
+
+    if (!userId) {
+      return res.status(400).json({error: "User ID is required"});
     }
 
-    res.status(200).json(transactionsList);
+    const parsedUserId = parseInt(userId);
+
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const { rows } = await pool.query(
+      "SELECT * FROM transactions WHERE user_id = $1 ORDER BY date DESC",
+      [parsedUserId]
+    );
+
+    res.status(200).json({ transactions: rows });
+
   } catch(err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -75,20 +97,20 @@ router.get("/:id", (req, res) => {
       return res.status(400).json({ error: "Invalid transaction ID" });
     }
 
-    const transaction = transactionsList.find(t => t.id === id);
+    const { rows } = await pool.query("SELECT * FROM transactions WHERE id = $1", [id]);
 
-    if (!transaction) {
+    if (rows.length === 0) {
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    res.status(200).json(transaction);
+    res.status(200).json({ transaction: rows[0] });
   } catch(err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -96,13 +118,16 @@ router.put("/:id", (req, res) => {
       return res.status(400).json({ error: "Invalid transaction ID" });
     }
 
-    const index = transactionsList.findIndex(t => t.id === id);
 
-    if (index === -1) {
+    const checkResult = await pool.query("SELECT * FROM transactions WHERE id = $1", [id]);
+
+    if (checkResult.rows.length === 0) {
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    const { id: _, userId: __, createdAt: ___, ...allowedUpdates } = req.body;
+
+    const { id: _, user_id: __, created_at: ___, ...allowedUpdates } = req.body;
+
 
     if (allowedUpdates.amount !== undefined) {
       if (typeof allowedUpdates.amount !== 'number' || allowedUpdates.amount === 0) {
@@ -116,19 +141,34 @@ router.put("/:id", (req, res) => {
       }
     }
 
-    transactionsList[index] = {
-      ...transactionsList[index],
-      ...allowedUpdates
-    };
+    const updateFields = [];
+    const values = [];
+    let paramCount = 1;
 
-    res.status(200).json(transactionsList[index]);
+    for (const [key, value] of Object.entries(allowedUpdates)) {
+      updateFields.push(`${key} = $${paramCount}`);
+      values.push(value);
+      paramCount++;
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    values.push(id);
+    const query = `UPDATE transactions SET ${updateFields.join(', ')} WHERE id = $${paramCount} RETURNING *`;
+
+    const { rows } = await pool.query(query, values);
+
+    res.status(200).json({ message: "Transaction updated successfully", transaction: rows[0] });
   } catch(err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.delete("/:id", (req, res) => {
+// DELETE transaction
+router.delete("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -136,18 +176,15 @@ router.delete("/:id", (req, res) => {
       return res.status(400).json({ error: "Invalid transaction ID" });
     }
 
-    const index = transactionsList.findIndex(t => t.id === id);
+    const { rows } = await pool.query("DELETE FROM transactions WHERE id = $1 RETURNING *", [id]);
 
-    if (index === -1) {
+    if (rows.length === 0) {
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    const deletedTransaction = transactionsList[index];
-    transactionsList.splice(index, 1);
-
     res.status(200).json({
       message: "Transaction deleted successfully",
-      transaction: deletedTransaction
+      transaction: rows[0]
     });
   } catch(err) {
     console.log(err);
