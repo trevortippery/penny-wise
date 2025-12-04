@@ -1,23 +1,7 @@
-const express = require('express');
-const authRoutes = require('./routes/auth');
-const transactionRoutes = require('./routes/transaction');
-const app = express();
-
-app.use(express.json());
-
-
-app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to penny-wise API",
-  });
-});
-
-
-app.use("/api/auth", authRoutes);
-app.use("/api/transactions", transactionRoutes);
-
+const app = require('./app');
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on 0.0.0.0:${PORT}`);
 });
