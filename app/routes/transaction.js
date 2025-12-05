@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({error: "User id is required"});
     }
 
-    if (!amount) {
+    if (amount === undefined || amount === null) {
       return res.status(400).json({error: "Amount for transaction is required"});
     }
 
@@ -63,8 +63,6 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const { userId } = req.query;
-
-
 
     if (!userId) {
       return res.status(400).json({error: "User ID is required"});
