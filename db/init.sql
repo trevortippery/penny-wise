@@ -17,7 +17,7 @@ CREATE TABLE categories (
   id SERIAL PRIMARY KEY,
   user_id INT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
-  type TEXT NOT NULL,
+  type TEXT NOT NULL, -- This column does not exist anymore
   color TEXT NOT NULL -- For future frontend development
 );
 
@@ -32,4 +32,3 @@ CREATE TABLE transactions (
   date DATE NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
-

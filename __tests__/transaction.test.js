@@ -23,38 +23,37 @@ describe("POST /api/transactions", () => {
 
   beforeEach(async () => {
     // 1. Create user
-    const userResponse = await request(app)
-      .post("/api/auth/register")
-      .send({
-        email: testEmail,
-        password: testPassword,
-      });
+    const userResponse = await request(app).post("/api/auth/register").send({
+      email: testEmail,
+      password: testPassword,
+    });
 
     userId = userResponse.body.user.id;
 
     // 2. Create a test category
     const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, type, color) VALUES ($1, $2, $3, $4) RETURNING *",
-      [userId, "Test Category", "expense", "#FF5733"]
+      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+      [userId, "Test Category", "#FF5733"],
     );
 
     categoryId = categoryResponse.rows[0].id;
   });
 
   test("should create a transaction with valid data", async () => {
-    const response = await request(app)
-      .post("/api/transactions")
-      .send({
-        userId: userId,
-        amount: 50.00,
-        date: "2024-12-01",
-        type: "deposit",
-        categoryId: categoryId,
-        description: "Test transaction"
-      });
+    const response = await request(app).post("/api/transactions").send({
+      userId: userId,
+      amount: 50.0,
+      date: "2024-12-01",
+      type: "deposit",
+      categoryId: categoryId,
+      description: "Test transaction",
+    });
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty("message", "Transaction created successfully");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Transaction created successfully",
+    );
     expect(response.body.transaction).toHaveProperty("id");
     expect(response.body.transaction).toHaveProperty("user_id", userId);
     expect(response.body.transaction).toHaveProperty("amount", "50.00");
@@ -64,13 +63,13 @@ describe("POST /api/transactions", () => {
   test("should return 400 when user id is missing", async () => {
     await testPost400Error(
       {
-        amount: 50.00,
+        amount: 50.0,
         date: "2024-12-01",
         type: "deposit",
         categoryId: categoryId,
-        description: "Test transaction"
+        description: "Test transaction",
       },
-      "User id is required"
+      "User id is required",
     );
   });
 
@@ -81,9 +80,9 @@ describe("POST /api/transactions", () => {
         date: "2024-12-01",
         type: "deposit",
         categoryId: categoryId,
-        description: "Test transaction"
+        description: "Test transaction",
       },
-      "Amount for transaction is required"
+      "Amount for transaction is required",
     );
   });
 
@@ -95,9 +94,9 @@ describe("POST /api/transactions", () => {
         date: "2024-12-01",
         type: "deposit",
         categoryId: categoryId,
-        description: "Test transaction"
+        description: "Test transaction",
       },
-      "Amount must be a non-zero number"
+      "Amount must be a non-zero number",
     );
   });
 
@@ -105,12 +104,12 @@ describe("POST /api/transactions", () => {
     await testPost400Error(
       {
         userId: userId,
-        amount: 50.00,
+        amount: 50.0,
         type: "deposit",
         categoryId: categoryId,
         description: "Test transaction",
       },
-      "Date is required for transaction"
+      "Date is required for transaction",
     );
   });
 
@@ -118,13 +117,13 @@ describe("POST /api/transactions", () => {
     await testPost400Error(
       {
         userId: userId,
-        amount: 50.00,
+        amount: 50.0,
         date: "invalid-date",
         type: "deposit",
         categoryId: categoryId,
         description: "Test transaction",
       },
-      "Invalid date format"
+      "Invalid date format",
     );
   });
 
@@ -132,12 +131,12 @@ describe("POST /api/transactions", () => {
     await testPost400Error(
       {
         userId: userId,
-        amount: 50.00,
+        amount: 50.0,
         date: "2024-12-01",
         categoryId: categoryId,
         description: "Test transaction",
       },
-      "Transaction type is required"
+      "Transaction type is required",
     );
   });
 
@@ -145,13 +144,13 @@ describe("POST /api/transactions", () => {
     await testPost400Error(
       {
         userId: userId,
-        amount: 50.00,
+        amount: 50.0,
         date: "2024-12-01",
         type: "invalid_type",
         categoryId: categoryId,
         description: "Test transaction",
       },
-      "Invalid type of transaction"
+      "Invalid type of transaction",
     );
   });
 
@@ -159,12 +158,12 @@ describe("POST /api/transactions", () => {
     await testPost400Error(
       {
         userId: userId,
-        amount: 50.00,
+        amount: 50.0,
         date: "2024-12-01",
         type: "deposit",
         description: "Test transaction",
       },
-      "Category ID is required"
+      "Category ID is required",
     );
   });
 
@@ -172,13 +171,13 @@ describe("POST /api/transactions", () => {
     await testPost400Error(
       {
         userId: userId,
-        amount: 50.00,
+        amount: 50.0,
         date: "2024-12-01",
         type: "deposit",
         categoryId: "not-a-number",
         description: "Test transaction",
       },
-      "Category ID must be a number"
+      "Category ID must be a number",
     );
   });
 });
@@ -189,50 +188,45 @@ describe("GET /api/transactions", () => {
 
   beforeEach(async () => {
     // Create user
-    const userResponse = await request(app)
-      .post("/api/auth/register")
-      .send({
-        email: testEmail,
-        password: testPassword,
-      });
+    const userResponse = await request(app).post("/api/auth/register").send({
+      email: testEmail,
+      password: testPassword,
+    });
 
     userId = userResponse.body.user.id;
 
     // Create category
     const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, type, color) VALUES ($1, $2, $3, $4) RETURNING *",
-      [userId, "Test Category", "expense", "#FF5733"]
+      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+      [userId, "Test Category", "#FF5733"],
     );
 
     categoryId = categoryResponse.rows[0].id;
 
     // Create transactions
-    await request(app)
-      .post("/api/transactions")
-      .send({
-        userId: userId,
-        amount: 50.00,
-        date: "2024-12-01",
-        type: "deposit",
-        categoryId: categoryId,
-        description: "Transaction 1"
-      });
+    await request(app).post("/api/transactions").send({
+      userId: userId,
+      amount: 50.0,
+      date: "2024-12-01",
+      type: "deposit",
+      categoryId: categoryId,
+      description: "Transaction 1",
+    });
 
-    await request(app)
-      .post("/api/transactions")
-      .send({
-        userId: userId,
-        amount: 75.00,
-        date: "2024-12-02",
-        type: "withdraw",
-        categoryId: categoryId,
-        description: "Transaction 2"
-      });
+    await request(app).post("/api/transactions").send({
+      userId: userId,
+      amount: 75.0,
+      date: "2024-12-02",
+      type: "withdraw",
+      categoryId: categoryId,
+      description: "Transaction 2",
+    });
   });
 
   test("should get all transactions for a user", async () => {
-    const response = await request(app)
-      .get(`/api/transactions?userId=${userId}`);
+    const response = await request(app).get(
+      `/api/transactions?userId=${userId}`,
+    );
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("transactions");
@@ -241,16 +235,14 @@ describe("GET /api/transactions", () => {
   });
 
   test("should return 400 when userId is missing", async () => {
-    const response = await request(app)
-      .get("/api/transactions");
+    const response = await request(app).get("/api/transactions");
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "User ID is required");
   });
 
   test("should return 400 for invalid userId format", async () => {
-    const response = await request(app)
-      .get("/api/transactions?userId=invalid");
+    const response = await request(app).get("/api/transactions?userId=invalid");
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "Invalid user ID");
@@ -264,19 +256,17 @@ describe("GET /api/transactions/:id", () => {
 
   beforeEach(async () => {
     // Create user
-    const userResponse = await request(app)
-      .post("/api/auth/register")
-      .send({
-        email: testEmail,
-        password: testPassword,
-      });
+    const userResponse = await request(app).post("/api/auth/register").send({
+      email: testEmail,
+      password: testPassword,
+    });
 
     userId = userResponse.body.user.id;
 
     // Create category
     const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, type, color) VALUES ($1, $2, $3, $4) RETURNING *",
-      [userId, "Test Category", "expense", "#FF5733"]
+      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+      [userId, "Test Category", "#FF5733"],
     );
 
     categoryId = categoryResponse.rows[0].id;
@@ -286,19 +276,20 @@ describe("GET /api/transactions/:id", () => {
       .post("/api/transactions")
       .send({
         userId: userId,
-        amount: 100.00,
+        amount: 100.0,
         date: "2024-12-01",
         type: "deposit",
         categoryId: categoryId,
-        description: "Test transaction"
+        description: "Test transaction",
       });
 
     transactionId = transactionResponse.body.transaction.id;
   });
 
   test("should get a single transaction by id", async () => {
-    const response = await request(app)
-      .get(`/api/transactions/${transactionId}`);
+    const response = await request(app).get(
+      `/api/transactions/${transactionId}`,
+    );
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("transaction");
@@ -308,16 +299,14 @@ describe("GET /api/transactions/:id", () => {
   });
 
   test("should return 400 for invalid transaction ID format", async () => {
-    const response = await request(app)
-      .get("/api/transactions/invalid");
+    const response = await request(app).get("/api/transactions/invalid");
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "Invalid transaction ID");
   });
 
   test("should return 404 when transaction not found", async () => {
-    const response = await request(app)
-      .get("/api/transactions/999");
+    const response = await request(app).get("/api/transactions/999");
 
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("error", "Transaction not found");
@@ -331,19 +320,17 @@ describe("PUT /api/transactions/:id", () => {
 
   beforeEach(async () => {
     // Create user
-    const userResponse = await request(app)
-      .post("/api/auth/register")
-      .send({
-        email: testEmail,
-        password: testPassword,
-      });
+    const userResponse = await request(app).post("/api/auth/register").send({
+      email: testEmail,
+      password: testPassword,
+    });
 
     userId = userResponse.body.user.id;
 
     // Create category
     const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, type, color) VALUES ($1, $2, $3, $4) RETURNING *",
-      [userId, "Test Category", "expense", "#FF5733"]
+      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+      [userId, "Test Category", "#FF5733"],
     );
 
     categoryId = categoryResponse.rows[0].id;
@@ -353,11 +340,11 @@ describe("PUT /api/transactions/:id", () => {
       .post("/api/transactions")
       .send({
         userId: userId,
-        amount: 100.00,
+        amount: 100.0,
         date: "2024-12-01",
         type: "deposit",
         categoryId: categoryId,
-        description: "Original description"
+        description: "Original description",
       });
 
     transactionId = transactionResponse.body.transaction.id;
@@ -367,33 +354,35 @@ describe("PUT /api/transactions/:id", () => {
     const response = await request(app)
       .put(`/api/transactions/${transactionId}`)
       .send({
-        amount: 150.00,
-        description: "Updated description"
+        amount: 150.0,
+        description: "Updated description",
       });
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("message", "Transaction updated successfully");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Transaction updated successfully",
+    );
     expect(response.body.transaction).toHaveProperty("amount", "150.00");
-    expect(response.body.transaction).toHaveProperty("description", "Updated description");
+    expect(response.body.transaction).toHaveProperty(
+      "description",
+      "Updated description",
+    );
   });
 
   test("should return 400 for invalid transaction ID format", async () => {
-    const response = await request(app)
-      .put("/api/transactions/invalid")
-      .send({
-        amount: 150.00
-      });
+    const response = await request(app).put("/api/transactions/invalid").send({
+      amount: 150.0,
+    });
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "Invalid transaction ID");
   });
 
   test("should return 404 when transaction not found", async () => {
-    const response = await request(app)
-      .put("/api/transactions/999")
-      .send({
-        amount: 150.00
-      });
+    const response = await request(app).put("/api/transactions/999").send({
+      amount: 150.0,
+    });
 
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("error", "Transaction not found");
@@ -403,18 +392,21 @@ describe("PUT /api/transactions/:id", () => {
     const response = await request(app)
       .put(`/api/transactions/${transactionId}`)
       .send({
-        amount: 0
+        amount: 0,
       });
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Amount must be a non-zero number");
+    expect(response.body).toHaveProperty(
+      "error",
+      "Amount must be a non-zero number",
+    );
   });
 
   test("should return 400 for invalid date format", async () => {
     const response = await request(app)
       .put(`/api/transactions/${transactionId}`)
       .send({
-        date: "invalid-date"
+        date: "invalid-date",
       });
 
     expect(response.status).toBe(400);
@@ -434,9 +426,9 @@ describe("PUT /api/transactions/:id", () => {
     const response = await request(app)
       .put(`/api/transactions/${transactionId}`)
       .send({
-        id: 999,  // Try to change ID
-        user_id: 999,  // Try to change user_id
-        amount: 200.00  // Valid update
+        id: 999, // Try to change ID
+        user_id: 999, // Try to change user_id
+        amount: 200.0, // Valid update
       });
 
     expect(response.status).toBe(200);
@@ -453,19 +445,17 @@ describe("DELETE /api/transactions/:id", () => {
 
   beforeEach(async () => {
     // Create user
-    const userResponse = await request(app)
-      .post("/api/auth/register")
-      .send({
-        email: testEmail,
-        password: testPassword,
-      });
+    const userResponse = await request(app).post("/api/auth/register").send({
+      email: testEmail,
+      password: testPassword,
+    });
 
     userId = userResponse.body.user.id;
 
     // Create category
     const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, type, color) VALUES ($1, $2, $3, $4) RETURNING *",
-      [userId, "Test Category", "expense", "#FF5733"]
+      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+      [userId, "Test Category", "#FF5733"],
     );
 
     categoryId = categoryResponse.rows[0].id;
@@ -475,42 +465,45 @@ describe("DELETE /api/transactions/:id", () => {
       .post("/api/transactions")
       .send({
         userId: userId,
-        amount: 100.00,
+        amount: 100.0,
         date: "2024-12-01",
         type: "deposit",
         categoryId: categoryId,
-        description: "Test transaction"
+        description: "Test transaction",
       });
 
     transactionId = transactionResponse.body.transaction.id;
   });
 
   test("should delete a transaction successfully", async () => {
-    const response = await request(app)
-      .delete(`/api/transactions/${transactionId}`);
+    const response = await request(app).delete(
+      `/api/transactions/${transactionId}`,
+    );
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("message", "Transaction deleted successfully");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Transaction deleted successfully",
+    );
     expect(response.body.transaction).toHaveProperty("id", transactionId);
 
     // Verify transaction is actually deleted
-    const getResponse = await request(app)
-      .get(`/api/transactions/${transactionId}`);
+    const getResponse = await request(app).get(
+      `/api/transactions/${transactionId}`,
+    );
 
     expect(getResponse.status).toBe(404);
   });
 
   test("should return 400 for invalid transaction ID format", async () => {
-    const response = await request(app)
-      .delete("/api/transactions/invalid");
+    const response = await request(app).delete("/api/transactions/invalid");
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "Invalid transaction ID");
   });
 
   test("should return 404 when transaction not found", async () => {
-    const response = await request(app)
-      .delete("/api/transactions/999");
+    const response = await request(app).delete("/api/transactions/999");
 
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("error", "Transaction not found");
@@ -519,9 +512,7 @@ describe("DELETE /api/transactions/:id", () => {
 
 // Helper function for testing 400 errors
 async function testPost400Error(testUnit, message) {
-  const response = await request(app)
-    .post("/api/transactions")
-    .send(testUnit);
+  const response = await request(app).post("/api/transactions").send(testUnit);
 
   expect(response.status).toBe(400);
   expect(response.body).toHaveProperty("error", message);
