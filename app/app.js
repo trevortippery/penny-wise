@@ -3,6 +3,7 @@ const authRoutes = require("./routes/auth");
 const transactionRoutes = require("./routes/transaction");
 const categoryRoutes = require("./routes/category");
 const app = express();
+require("dotenv").config();
 
 app.use(express.json());
 

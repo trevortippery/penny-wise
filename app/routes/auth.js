@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../db/db");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const verifyToken = require("../../middleware/authMiddleware");
 
 async function hashPassword(password) {
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -12,8 +14,6 @@ async function comparePasswords(password, hashedPassword) {
   const match = await bcrypt.compare(password, hashedPassword);
   return match;
 }
-
-// const users = [];
 
 router.post("/register", async (req, res) => {
   try {
@@ -94,25 +94,29 @@ router.post("/login", async (req, res) => {
       return;
     }
 
-    res.status(200).json({ message: "User successfully logged in" });
+    const token = jwt.sign(
+      {
+        userId: rows[0].id,
+        email: email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" },
+    );
+
+    res
+      .status(200)
+      .json({ message: "User successfully logged in", token: token });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.get("/users/:id", async (req, res) => {
+router.get("/me", verifyToken, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-
-    if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid user ID" });
-      return;
-    }
-
     const { rows } = await pool.query(
       "SELECT id, email, created_at, updated_at FROM users WHERE id = $1",
-      [id],
+      [req.user.userId],
     );
 
     if (rows.length === 0) {

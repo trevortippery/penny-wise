@@ -15,6 +15,10 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "User id is required" });
     }
 
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user id" });
+    }
+
     if (!name) {
       return res.status(400).json({ error: "Name is required" });
     }
