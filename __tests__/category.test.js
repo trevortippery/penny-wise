@@ -112,4 +112,74 @@ describe("POST /api/categories", () => {
       crudAction: "POST",
     });
   });
+
+  // Test for not being able to have duplicate categories
+  test("should 400 error when creating a category that already exists", async () => {
+    duplicateCategory = {
+      route: categoriesRoute,
+      testUnit: {
+        name: "Utilities",
+        color: "FF5733",
+      },
+      authToken: authToken,
+      crudAction: "POST",
+    };
+
+    await request(app)
+      .post(categoriesRoute)
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        name: "Utilities",
+        color: "FF5733",
+      });
+
+    await testUtils.testError({
+      statusCode: 400,
+      message: "Category already exists",
+      ...duplicateCategory,
+    });
+  });
+});
+
+describe("GET /api/categories", () => {
+  let userId;
+  let authToken;
+
+  beforeEach(async () => {
+    const userResponse = await request(app).post("/api/auth/register").send({
+      email: testEmail,
+      password: testPassword,
+    });
+
+    userId = userResponse.body.user.id;
+
+    const loginResponse = await request(app).post("/api/auth/login").send({
+      email: testEmail,
+      password: testPassword,
+    });
+
+    authToken = loginResponse.body.token;
+  });
+
+  // Test to get all categories associated with the user
+  test("should return all categories from a test user", async () => {
+    await request(app)
+      .post(categoriesRoute)
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({ name: "Utilities", color: "FF5733" });
+
+    await request(app)
+      .post(categoriesRoute)
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({ name: "Food", color: "FF5732" });
+
+    const response = await request(app)
+      .get(categoriesRoute)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("categories");
+    expect(response.body.categories).toHaveLength(2);
+    expect(response.body.categories[0]).toHaveProperty("user_id", userId);
+  });
 });
