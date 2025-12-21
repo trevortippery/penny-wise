@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("../app/app");
 const pool = require("../db/db");
-const jwt = require("jsonwebtoken");
+const testUtils = require("./tests-util");
 
 afterEach(async () => {
   await pool.query("DELETE FROM transactions");
@@ -13,54 +13,16 @@ afterAll(async () => {
   await pool.end();
 });
 
+// test variables
 const testEmail = "testuser@example.com";
 const testPassword = "password123";
-
-// Helper function to create an auth token
-function createAuthToken(userId, email = testEmail) {
-  return jwt.sign({ userId, email }, process.env.JWT_SECRET, {
-    expiresIn: "24h",
-  });
-}
-
-// Reusable validation test helpers
-function testMissingEmail(route) {
-  test("should return 400 when email is missing", async () => {
-    const response = await request(app).post(`/api/auth/${route}`).send({
-      password: testPassword,
-    });
-
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Email is required");
-  });
-}
-
-function testMissingPassword(route) {
-  test("should return 400 when password is missing", async () => {
-    const response = await request(app).post(`/api/auth/${route}`).send({
-      email: testEmail,
-    });
-
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Password is required");
-  });
-}
-
-function testInvalidEmailFormat(route) {
-  test("should return 400 for invalid email format", async () => {
-    const response = await request(app).post(`/api/auth/${route}`).send({
-      email: "invalidemail@",
-      password: testPassword,
-    });
-
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Invalid email format");
-  });
-}
+const registerRoute = "/api/auth/register";
+const loginRoute = "/api/auth/login";
+const meRoute = "/api/auth/me";
 
 describe("POST /api/auth/register", () => {
   test("should create a new user with valid data", async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await request(app).post(registerRoute).send({
       email: testEmail,
       password: testPassword,
     });
@@ -75,38 +37,73 @@ describe("POST /api/auth/register", () => {
     expect(response.body.user).not.toHaveProperty("password_hash");
   });
 
-  // Use helper functions for validation tests
-  testMissingEmail("register");
-  testMissingPassword("register");
-  testInvalidEmailFormat("register");
+  test("should return 400 when email is missing", async () => {
+    await testUtils.testError({
+      route: registerRoute,
+      testUnit: {
+        password: testPassword,
+      },
+      statusCode: 400,
+      message: "Email is required",
+      crudAction: "POST",
+    });
+  });
+
+  test("should return 400 when password is missing", async () => {
+    await testUtils.testError({
+      route: registerRoute,
+      testUnit: {
+        email: testEmail,
+      },
+      statusCode: 400,
+      message: "Password is required",
+      crudAction: "POST",
+    });
+  });
+
+  test("should return 400 for invalid email format", async () => {
+    await testUtils.testError({
+      route: registerRoute,
+      testUnit: {
+        email: "invalidemail@",
+        password: testPassword,
+      },
+      statusCode: 400,
+      message: "Invalid email format",
+      crudAction: "POST",
+    });
+  });
 
   test("should return 400 when registering duplicate email", async () => {
-    await request(app).post("/api/auth/register").send({
+    await request(app).post(registerRoute).send({
       email: testEmail,
       password: testPassword,
     });
 
-    const response = await request(app).post("/api/auth/register").send({
-      email: testEmail,
-      password: testPassword,
+    await testUtils.testError({
+      route: registerRoute,
+      testUnit: {
+        email: testEmail,
+        password: testPassword,
+      },
+      statusCode: 400,
+      message: "Email already exists",
+      crudAction: "POST",
     });
-
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Email already exists");
   });
 });
 
 describe("POST /api/auth/login", () => {
   // Use beforeEach to create a user before each login test
   beforeEach(async () => {
-    await request(app).post("/api/auth/register").send({
+    await request(app).post(registerRoute).send({
       email: testEmail,
       password: testPassword,
     });
   });
 
   test("should login successfully with valid credentials and return token", async () => {
-    const response = await request(app).post("/api/auth/login").send({
+    const response = await request(app).post(loginRoute).send({
       email: testEmail,
       password: testPassword,
     });
@@ -121,29 +118,68 @@ describe("POST /api/auth/login", () => {
   });
 
   // Use helper functions for validation tests
-  testMissingEmail("login");
-  testMissingPassword("login");
-  testInvalidEmailFormat("login");
+  test("should return 400 when email is missing", async () => {
+    await testUtils.testError({
+      route: loginRoute,
+      testUnit: {
+        password: testPassword,
+      },
+      statusCode: 400,
+      message: "Email is required",
+      crudAction: "POST",
+    });
+  });
+
+  test("should return 400 when password is missing", async () => {
+    await testUtils.testError({
+      route: loginRoute,
+      testUnit: {
+        email: testEmail,
+      },
+      statusCode: 400,
+      message: "Password is required",
+      crudAction: "POST",
+    });
+  });
+
+  test("should return 400 for invalid email format", async () => {
+    await testUtils.testError({
+      route: loginRoute,
+      testUnit: {
+        email: "invalidemail@",
+        password: testPassword,
+      },
+      statusCode: 400,
+      message: "Invalid email format",
+      crudAction: "POST",
+    });
+  });
 
   test("should return 401 when user does not exist", async () => {
     // Note: beforeEach creates a user, but we're testing with different email
-    const response = await request(app).post("/api/auth/login").send({
-      email: "nonexistent@example.com",
-      password: testPassword,
+    await testUtils.testError({
+      route: loginRoute,
+      testUnit: {
+        email: "nonexistent@example.com",
+        password: testPassword,
+      },
+      statusCode: 401,
+      message: "Invalid credentials",
+      crudAction: "POST",
     });
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error", "Invalid credentials");
   });
 
   test("should return 401 with incorrect password", async () => {
-    const response = await request(app).post("/api/auth/login").send({
-      email: testEmail,
-      password: "wrongpassword",
+    await testUtils.testError({
+      route: loginRoute,
+      testUnit: {
+        email: testEmail,
+        password: "wrongpassword",
+      },
+      statusCode: 401,
+      message: "Invalid credentials",
+      crudAction: "POST",
     });
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error", "Invalid credentials");
   });
 });
 
@@ -153,29 +189,32 @@ describe("GET /api/auth/me", () => {
 
   // Use beforeEach to create a user and store ID
   beforeEach(async () => {
-    const response = await request(app).post("/api/auth/register").send({
+    const response = await request(app).post(registerRoute).send({
       email: testEmail,
       password: testPassword,
     });
     userId = response.body.user.id;
 
-    authToken = createAuthToken(userId, testEmail);
+    authToken = testUtils.createAuthToken(userId, testEmail);
   });
 
   test("should return 401 when no token provided", async () => {
-    const response = await request(app).get("/api/auth/me");
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error", "No token provided");
+    await testUtils.testError({
+      route: meRoute,
+      statusCode: 401,
+      message: "No token provided",
+      crudAction: "GET",
+    });
   });
 
   test("should return 401 when invalid token provided", async () => {
-    const response = await request(app)
-      .get("/api/auth/me")
-      .set("Authorization", "Bearer invalid-token");
-
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty("error", "Invalid or expired token");
+    await testUtils.testError({
+      route: meRoute,
+      statusCode: 401,
+      authToken: "invalid-token",
+      message: "Invalid or expired token",
+      crudAction: "GET",
+    });
   });
 
   test("should return current user data with valid token", async () => {

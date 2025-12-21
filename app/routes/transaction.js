@@ -1,19 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../db/db");
+const verifyToken = require("../../middleware/authMiddleware");
 
 const Transactions = {
   DEPOSIT: "deposit",
   WITHDRAW: "withdraw",
 };
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
-    const { userId, amount, date, type, categoryId, description } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ error: "User id is required" });
-    }
+    const { amount, date, type, categoryId, description } = req.body;
 
     if (amount === undefined || amount === null) {
       return res
@@ -55,38 +52,24 @@ router.post("/", async (req, res) => {
 
     const { rows } = await pool.query(
       "INSERT INTO transactions(user_id, amount, type, category_id, description, date) VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
-      [userId, amount, type, categoryId, description || null, date],
+      [req.user.userId, amount, type, categoryId, description || null, date],
     );
 
-    res
-      .status(201)
-      .json({
-        message: "Transaction created successfully",
-        transaction: rows[0],
-      });
+    res.status(201).json({
+      message: "Transaction created successfully",
+      transaction: rows[0],
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
-    const { userId } = req.query;
-
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
-    }
-
-    const parsedUserId = parseInt(userId);
-
-    if (isNaN(parsedUserId)) {
-      return res.status(400).json({ error: "Invalid user ID" });
-    }
-
     const { rows } = await pool.query(
       "SELECT * FROM transactions WHERE user_id = $1 ORDER BY date DESC",
-      [parsedUserId],
+      [req.user.userId],
     );
 
     res.status(200).json({ transactions: rows });
@@ -96,7 +79,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -105,8 +88,8 @@ router.get("/:id", async (req, res) => {
     }
 
     const { rows } = await pool.query(
-      "SELECT * FROM transactions WHERE id = $1",
-      [id],
+      "SELECT * FROM transactions WHERE id = $1 AND user_id = $2",
+      [id, req.user.userId],
     );
 
     if (rows.length === 0) {
@@ -120,7 +103,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -129,8 +112,8 @@ router.put("/:id", async (req, res) => {
     }
 
     const checkResult = await pool.query(
-      "SELECT * FROM transactions WHERE id = $1",
-      [id],
+      "SELECT * FROM transactions WHERE id = $1 AND user_id = $2",
+      [id, req.user.userId],
     );
 
     if (checkResult.rows.length === 0) {
@@ -171,24 +154,21 @@ router.put("/:id", async (req, res) => {
     }
 
     values.push(id);
-    const query = `UPDATE transactions SET ${updateFields.join(", ")} WHERE id = $${paramCount} RETURNING *`;
-
+    values.push(req.user.userId);
+    const query = `UPDATE transactions SET ${updateFields.join(", ")} WHERE id = $${paramCount} AND user_id = $${paramCount + 1} RETURNING *`;
     const { rows } = await pool.query(query, values);
 
-    res
-      .status(200)
-      .json({
-        message: "Transaction updated successfully",
-        transaction: rows[0],
-      });
+    res.status(200).json({
+      message: "Transaction updated successfully",
+      transaction: rows[0],
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// DELETE transaction
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -197,8 +177,8 @@ router.delete("/:id", async (req, res) => {
     }
 
     const { rows } = await pool.query(
-      "DELETE FROM transactions WHERE id = $1 RETURNING *",
-      [id],
+      "DELETE FROM transactions WHERE id = $1 AND user_id = $2 RETURNING *",
+      [id, req.user.userId],
     );
 
     if (rows.length === 0) {
