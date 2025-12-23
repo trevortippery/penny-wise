@@ -16,7 +16,6 @@ afterAll(async () => {
 });
 
 // Test variables
-const testEmail = "transactiontest@example.com";
 const testPassword = "password123";
 const registerRoute = "/api/auth/register";
 const loginRoute = "/api/auth/login";
@@ -29,25 +28,10 @@ describe("POST /api/transactions", () => {
 
   beforeEach(async () => {
     // Create user
-    const userResponse = await request(app).post(registerRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    userId = userResponse.body.user.id;
-
-    // Login to get token
-    const loginResponse = await request(app).post(loginRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    authToken = loginResponse.body.token;
-
-    // Create a test category
-    const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
-      [userId, "Test Category", "#FF5733"],
-    );
-    categoryId = categoryResponse.rows[0].id;
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
   });
 
   test("should create a transaction with valid data", async () => {
@@ -174,24 +158,10 @@ describe("GET /api/transactions", () => {
 
   beforeEach(async () => {
     // Create user and login
-    const userResponse = await request(app).post(registerRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    userId = userResponse.body.user.id;
-
-    const loginResponse = await request(app).post(loginRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    authToken = loginResponse.body.token;
-
-    // Create category
-    const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
-      [userId, "Test Category", "#FF5733"],
-    );
-    categoryId = categoryResponse.rows[0].id;
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
 
     // Create transactions
     await request(app)
@@ -290,24 +260,10 @@ describe("GET /api/transactions/:id", () => {
 
   beforeEach(async () => {
     // Create user and login
-    const userResponse = await request(app).post(registerRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    userId = userResponse.body.user.id;
-
-    const loginResponse = await request(app).post(loginRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    authToken = loginResponse.body.token;
-
-    // Create category
-    const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
-      [userId, "Test Category", "#FF5733"],
-    );
-    categoryId = categoryResponse.rows[0].id;
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
 
     // Create a transaction
     const transactionResponse = await request(app)
@@ -377,23 +333,10 @@ describe("PUT /api/transactions/:id", () => {
   let transactionId;
 
   beforeEach(async () => {
-    const userResponse = await request(app).post(registerRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    userId = userResponse.body.user.id;
-
-    const loginResponse = await request(app).post(loginRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    authToken = loginResponse.body.token;
-
-    const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
-      [userId, "Test Category", "#FF5733"],
-    );
-    categoryId = categoryResponse.rows[0].id;
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
 
     const transactionResponse = await request(app)
       .post(transactionsRoute)
@@ -431,7 +374,7 @@ describe("PUT /api/transactions/:id", () => {
   });
 
   test("should return 404 when trying to update another user's transaction", async () => {
-    const user2Response = await request(app).post(registerRoute).send({
+    await request(app).post(registerRoute).send({
       email: "user2@example.com",
       password: testPassword,
     });
@@ -482,23 +425,10 @@ describe("DELETE /api/transactions/:id", () => {
   let transactionId;
 
   beforeEach(async () => {
-    const userResponse = await request(app).post(registerRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    userId = userResponse.body.user.id;
-
-    const loginResponse = await request(app).post(loginRoute).send({
-      email: testEmail,
-      password: testPassword,
-    });
-    authToken = loginResponse.body.token;
-
-    const categoryResponse = await pool.query(
-      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
-      [userId, "Test Category", "#FF5733"],
-    );
-    categoryId = categoryResponse.rows[0].id;
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
 
     const transactionResponse = await request(app)
       .post(transactionsRoute)

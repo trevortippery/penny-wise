@@ -49,4 +49,41 @@ async function testError({
   expect(response.body).toHaveProperty("error", message);
 }
 
-module.exports = { createAuthToken, testError };
+async function setupTestUser(app) {
+  const testEmail = `test-${Date.now()}@example.com`;
+  const testPassword = "testpass123";
+
+  const userResponse = await request(app).post("/api/auth/register").send({
+    email: testEmail,
+    password: testPassword,
+  });
+  const userId = userResponse.body.user.id;
+
+  const loginResponse = await request(app).post("/api/auth/login").send({
+    email: testEmail,
+    password: testPassword,
+  });
+  const authToken = loginResponse.body.token;
+
+  return { userId, authToken, testEmail, testPassword };
+}
+
+async function setupTestUserWithCategory(app, pool) {
+  const { userId, authToken, testEmail, testPassword } =
+    await setupTestUser(app);
+
+  const categoryResponse = await pool.query(
+    "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+    [userId, "Test Category", "#FF5733"],
+  );
+  const categoryId = categoryResponse.rows[0].id;
+
+  return { userId, authToken, categoryId, testEmail, testPassword };
+}
+
+module.exports = {
+  createAuthToken,
+  testError,
+  setupTestUser,
+  setupTestUserWithCategory,
+};

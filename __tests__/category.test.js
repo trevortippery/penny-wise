@@ -12,9 +12,11 @@ afterEach(async () => {
 afterAll(async () => {
   await pool.end();
 });
-const testEmail = "categorytest@example.com";
+
 const testPassword = "password123";
 const categoriesRoute = "/api/categories";
+const registerRoute = "/api/auth/register";
+const loginRoute = "/api/auth/login";
 
 describe("POST /api/categories", () => {
   let userId;
@@ -22,19 +24,9 @@ describe("POST /api/categories", () => {
 
   // Create test user
   beforeEach(async () => {
-    const userResponse = await request(app).post("/api/auth/register").send({
-      email: testEmail,
-      password: testPassword,
-    });
-
-    userId = userResponse.body.user.id;
-
-    const loginResponse = await request(app).post("/api/auth/login").send({
-      email: testEmail,
-      password: testPassword,
-    });
-
-    authToken = loginResponse.body.token;
+    const setup = await testUtils.setupTestUser(app);
+    userId = setup.userId;
+    authToken = setup.authToken;
   });
 
   // first test a valid category creation
@@ -144,34 +136,22 @@ describe("POST /api/categories", () => {
 describe("GET /api/categories", () => {
   let userId;
   let authToken;
+  let categoryId;
 
   beforeEach(async () => {
-    const userResponse = await request(app).post("/api/auth/register").send({
-      email: testEmail,
-      password: testPassword,
-    });
-
-    userId = userResponse.body.user.id;
-
-    const loginResponse = await request(app).post("/api/auth/login").send({
-      email: testEmail,
-      password: testPassword,
-    });
-
-    authToken = loginResponse.body.token;
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
   });
 
   // Test to get all categories associated with the user
   test("should return all categories from a test user", async () => {
+    // Adds another category to get two
     await request(app)
       .post(categoriesRoute)
       .set("Authorization", `Bearer ${authToken}`)
       .send({ name: "Utilities", color: "FF5733" });
-
-    await request(app)
-      .post(categoriesRoute)
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({ name: "Food", color: "FF5732" });
 
     const response = await request(app)
       .get(categoriesRoute)
@@ -181,5 +161,177 @@ describe("GET /api/categories", () => {
     expect(response.body).toHaveProperty("categories");
     expect(response.body.categories).toHaveLength(2);
     expect(response.body.categories[0]).toHaveProperty("user_id", userId);
+  });
+});
+
+describe("GET /api/categories/:id", () => {
+  let userId;
+  let authToken;
+  let categoryId;
+
+  beforeEach(async () => {
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
+  });
+
+  test("should return appropriate category based off of id", async () => {
+    const response = await request(app)
+      .get(`${categoriesRoute}/${categoryId}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("category");
+    expect(response.body.category).toHaveProperty("id", categoryId);
+    expect(response.body.category).toHaveProperty("user_id", userId);
+    expect(response.body.category).toHaveProperty("name", "Test Category");
+    expect(response.body.category).toHaveProperty("color", "#FF5733");
+  });
+
+  test("should 404 error when trying to access another user's categories", async () => {
+    await request(app).post(registerRoute).send({
+      email: "user2@example.com",
+      password: testPassword,
+    });
+
+    const user2LoginResponse = await request(app).post(loginRoute).send({
+      email: "user2@example.com",
+      password: testPassword,
+    });
+    const user2Token = user2LoginResponse.body.token;
+
+    await testUtils.testError({
+      route: `${categoriesRoute}/${categoryId}`,
+      authToken: user2Token,
+      statusCode: 404,
+      message: "Category not found",
+      crudAction: "GET",
+    });
+  });
+
+  test("should return 400 for invalid category ID format", async () => {
+    await testUtils.testError({
+      route: `${categoriesRoute}/invalid`,
+      authToken: authToken,
+      statusCode: 400,
+      message: "Invalid category id",
+      crudAction: "GET",
+    });
+  });
+});
+
+describe("PUT /api/categories/:id", () => {
+  let userId;
+  let authToken;
+  let categoryId;
+
+  beforeEach(async () => {
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
+  });
+
+  test("should update a category successfully", async () => {
+    const response = await request(app)
+      .put(`${categoriesRoute}/${categoryId}`)
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({ name: "Food", color: "Green" });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Category updated successfully",
+    );
+    expect(response.body.category).toHaveProperty("name", "Food");
+    expect(response.body.category).toHaveProperty("color", "Green");
+  });
+
+  test("should return 404 when trying to update another user's categories", async () => {
+    await request(app).post(registerRoute).send({
+      email: "user2@example.com",
+      password: testPassword,
+    });
+
+    const user2LoginResponse = await request(app).post(loginRoute).send({
+      email: "user2@example.com",
+      password: testPassword,
+    });
+    const user2Token = user2LoginResponse.body.token;
+
+    await testUtils.testError({
+      route: `${categoriesRoute}/${categoryId}`,
+      testUnit: { name: "Food" },
+      authToken: user2Token,
+      statusCode: 404,
+      message: "Category not found",
+      crudAction: "PUT",
+    });
+  });
+
+  test("should return 400 when name is null", async () => {
+    await testUtils.testError({
+      route: `${categoriesRoute}/${categoryId}`,
+      testUnit: { name: null },
+      authToken: authToken,
+      statusCode: 400,
+      message: "Name is required",
+      crudAction: "PUT",
+    });
+  });
+});
+
+describe("DELETE /api/categories/:id", () => {
+  let userId;
+  let authToken;
+  let categoryId;
+
+  beforeEach(async () => {
+    const setup = await testUtils.setupTestUserWithCategory(app, pool);
+    userId = setup.userId;
+    authToken = setup.authToken;
+    categoryId = setup.categoryId;
+  });
+
+  test("should delete a category successfully", async () => {
+    const response = await request(app)
+      .delete(`${categoriesRoute}/${categoryId}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Category deleted successfully",
+    );
+    expect(response.body.category).toHaveProperty("id", categoryId);
+
+    // Verify category is actually deleted
+    const getResponse = await request(app)
+      .get(`${categoriesRoute}/${categoryId}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    expect(getResponse.status).toBe(404);
+  });
+
+  test("should return 404 when trying to delete another user's categories", async () => {
+    await request(app).post(registerRoute).send({
+      email: "user2@example.com",
+      password: testPassword,
+    });
+
+    const user2LoginResponse = await request(app).post(loginRoute).send({
+      email: "user2@example.com",
+      password: testPassword,
+    });
+    const user2Token = user2LoginResponse.body.token;
+
+    await testUtils.testError({
+      route: `${categoriesRoute}/${categoryId}`,
+      authToken: user2Token,
+      statusCode: 404,
+      message: "Category not found",
+      crudAction: "DELETE",
+    });
   });
 });
