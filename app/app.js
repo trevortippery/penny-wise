@@ -4,13 +4,28 @@ const transactionRoutes = require("./routes/transaction");
 const categoryRoutes = require("./routes/category");
 const app = express();
 require("dotenv").config();
+const path = require("path");
 
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, "client")));
+
+const viewsDir = path.join(__dirname, "client/pages");
+
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(viewsDir, "login.html"))
+});
+
 app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to penny-wise API",
-  });
+  res.sendFile(path.join(viewsDir, "index.html"));
+})
+
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(viewsDir, "register.html"));
+});
+
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(viewsDir, "dashboard.html"));
 });
 
 app.use("/api/auth", authRoutes);
