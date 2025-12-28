@@ -13,12 +13,12 @@ app.use(express.static(path.join(__dirname, "client")));
 const viewsDir = path.join(__dirname, "client/pages");
 
 app.get("/login", (req, res) => {
-  res.sendFile(path.join(viewsDir, "login.html"))
+  res.sendFile(path.join(viewsDir, "login.html"));
 });
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(viewsDir, "index.html"));
-})
+});
 
 app.get("/register", (req, res) => {
   res.sendFile(path.join(viewsDir, "register.html"));
@@ -26,6 +26,10 @@ app.get("/register", (req, res) => {
 
 app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(viewsDir, "dashboard.html"));
+});
+
+app.get("/about", (req, res) => {
+  res.sendFile(path.join(viewsDir, "about.html"));
 });
 
 app.use("/api/auth", authRoutes);
