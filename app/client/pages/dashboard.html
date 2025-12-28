@@ -4,19 +4,44 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dashboard</title>
+        <link rel="stylesheet" href="../styles/dashboard.css" />
     </head>
     <body>
         <nav class="nav">
             <div class="nav-container">
-                <ul class="nav-menu">
-                    <li><a href="/dashboard">Home</a></li>
+                <ul class="nav-menu-first">
+                    <li>
+                        <h1><a href="/dashboard">Home</a></h1>
+                    </li>
                     <li><a href="/transactions">Transactions</a></li>
                     <li><a href="/categories">Categories</a></li>
+                </ul>
+                <ul class="nav-menu-second">
                     <li><a href="/account">Profile</a></li>
                     <li><a href="/">Sign Out</a></li>
                 </ul>
             </div>
         </nav>
+
+        <div class="content">
+            <article class="summary"><h2>Summary</h2></article>
+            <article class="transactions">
+                <h2>Recent Transactions</h2>
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="transaction-body"></tbody>
+                </table>
+            </article>
+            <article class="categories"><h2>Categories</h2></article>
+        </div>
         <script src="../js/dashboard.js"></script>
     </body>
 </html>
