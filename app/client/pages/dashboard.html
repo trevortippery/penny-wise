@@ -18,29 +18,63 @@
                 </ul>
                 <ul class="nav-menu-second">
                     <li><a href="/account">Profile</a></li>
-                    <li><a href="/">Sign Out</a></li>
+                    <li><a class="sign-out" href="/">Sign Out</a></li>
                 </ul>
             </div>
         </nav>
 
         <div class="content">
-            <article class="summary"><h2>Summary</h2></article>
-            <article class="transactions">
-                <h2>Recent Transactions</h2>
+            <section class="summary"><h2>Summary</h2></section>
+            <section class="transactions">
+                <div class="table-heading">
+                    <h2>Recent Transactions</h2>
+                    <a href="/addTransaction">Add Transaction</a>
+                </div>
                 <table class="transaction-table">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th>Amount</th>
+                            <th>DATE</th>
+                            <th>TYPE</th>
+                            <th>CATEGORY</th>
+                            <th>DESCRIPTION</th>
+                            <th>AMOUNT</th>
                         </tr>
                     </thead>
-                    <tbody class="transaction-body"></tbody>
+                    <tbody class="transaction-body">
+                        <tr>
+                            <td>2024-01-15</td>
+                            <td>
+                                <span class="type-badge income">Income</span>
+                            </td>
+                            <td>Salary</td>
+                            <td>Monthly salary payment</td>
+                            <td class="amount income">$3,500.00</td>
+                        </tr>
+                        <tr>
+                            <td>2024-01-14</td>
+                            <td>
+                                <span class="type-badge expense">Expense</span>
+                            </td>
+                            <td>Groceries</td>
+                            <td>Weekly shopping</td>
+                            <td class="amount expense">-$125.50</td>
+                        </tr>
+                        <tr>
+                            <td>2024-01-12</td>
+                            <td>
+                                <span class="type-badge expense">Expense</span>
+                            </td>
+                            <td>Transportation</td>
+                            <td>Gas station</td>
+                            <td class="amount expense">-$45.00</td>
+                        </tr>
+                    </tbody>
                 </table>
-            </article>
-            <article class="categories"><h2>Categories</h2></article>
+            </section>
+            <section class="categories">
+                <h2>Categories</h2>
+                <a href="/addCategory">Add Category</a>
+            </section>
         </div>
         <script src="../js/dashboard.js"></script>
     </body>

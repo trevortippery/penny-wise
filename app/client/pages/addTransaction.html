@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Create Transaction</title>
+    </head>
+    <body>
+        <form id="addTransaction" onsubmit="validateTransactionForm(event)">
+            <h1>Add Transaction</h1>
+            <label for="type">Type</label>
+            <select id="type" name="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <label for="category">Category</label>
+        </form>
+    </body>
+</html>

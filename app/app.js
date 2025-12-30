@@ -44,6 +44,15 @@ app.get("/account", (req, res) => {
   res.sendFile(path.join(viewsDir, "account.html"));
 });
 
+app.get("/addTransaction", (req, res) => {
+  res.sendFile(path.join(viewsDir, "addTransaction.html"));
+});
+
+app.get("/addCategory", (req, res) => {
+  res.sendFile(path.join(viewsDir, "addCategory.html"));
+});
+
+app.get("");
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/categories", categoryRoutes);
