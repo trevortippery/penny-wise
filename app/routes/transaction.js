@@ -52,7 +52,7 @@ router.post("/", verifyToken, async (req, res) => {
 
     const { rows } = await pool.query(
       "INSERT INTO transactions(user_id, amount, type, category_id, description, date) VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
-      [req.user.userId, amount, type, categoryId, description || null, date],
+      [req.user.userId, amount, type, categoryId, description ?? null, date],
     );
 
     res.status(201).json({
@@ -68,7 +68,13 @@ router.post("/", verifyToken, async (req, res) => {
 router.get("/", verifyToken, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      "SELECT * FROM transactions WHERE user_id = $1 ORDER BY date DESC",
+      `SELECT
+        transactions.*,
+        categories.name as category_name
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.user_id = $1
+        ORDER BY transactions.date DESC`,
       [req.user.userId],
     );
 

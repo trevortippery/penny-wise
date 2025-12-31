@@ -56,6 +56,45 @@ async function handleFormSubmit(event, endpoint, options = {}) {
   return false;
 }
 
+async function validateTransactionForm(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const token = localStorage.getItem("token");
+
+  const formData = {
+    type: form.type.value,
+    categoryId: parseInt(form.category.value),
+    amount: parseFloat(form.amount.value),
+    description: form.description.value,
+    date: form.date.value,
+  };
+
+  try {
+    const response = await fetch("/api/transactions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      window.location.href = "/dashboard";
+    } else {
+      alert(data.error || "An error occurred");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("An error occurred. Please try again.");
+  }
+
+  return false;
+}
+
 function validateRegisterForm(event) {
   return handleFormSubmit(event, "/api/auth/register", {
     redirectTo: "/",
@@ -73,13 +112,5 @@ function validateCategoryForm(event) {
     requiresAuth: true,
     redirectTo: "/dashboard",
     fieldMap: { categoryColor: "color" },
-  });
-}
-
-function validateTransactionForm(event) {
-  return handleFormSubmit(event, "/api/transactions", {
-    requiresAuth: true,
-    redirectTo: "/",
-    fieldMap: {},
   });
 }

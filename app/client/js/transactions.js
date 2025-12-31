@@ -10,6 +10,11 @@ async function loadCategories() {
     });
 
     const categories = await response.json();
+    console.log(categories);
+
+    if (categories.categories.length === 0) {
+      alert("");
+    }
 
     const categorySelect = document.getElementById("category");
 
