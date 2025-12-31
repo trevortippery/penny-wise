@@ -1,4 +1,6 @@
 const token = localStorage.getItem("token");
+let currentPage = 1;
+const rowsPerPage = 5;
 
 if (!token) {
   window.location.href = "/";
@@ -24,7 +26,6 @@ async function checkCategories() {
   });
 
   const categories = await response.json();
-  console.log(categories.categories);
 
   if (!categories.categories || categories.categories.length === 0) {
     addTransactionButton.disabled = true;
@@ -52,8 +53,7 @@ async function checkCategories() {
   }
 }
 
-async function populateTransactionTable() {
-  const transactionBody = document.querySelector(".transaction-body");
+async function fetchTransactionTable() {
   const table = document.querySelector(".transaction-table");
   const transactionSection = document.querySelector(".transactions");
 
@@ -72,45 +72,77 @@ async function populateTransactionTable() {
     transactionSection.appendChild(newPTag);
   } else {
     table.style.display = "table";
-    transaction.transactions.forEach((t) => {
-      const row = document.createElement("tr");
-      const amount = parseFloat(t.amount);
-      const sign = t.type === "withdraw" ? "-" : "";
-      const date = new Date(t.date).toISOString().split("T")[0];
+    displayTransactionTable(currentPage, transaction.transactions);
+  }
+}
 
-      const dateCell = document.createElement("td");
-      dateCell.textContent = date;
+function displayTransactionTable(page, data) {
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const slicedData = data.slice(startIndex, endIndex);
+  const transactionBody = document.querySelector(".transaction-body");
 
-      const typeCell = document.createElement("td");
-      const typeBadge = document.createElement("span");
-      typeBadge.className = `type-badge ${t.type}`;
-      typeBadge.textContent = t.type === "deposit" ? "Deposit" : "Withdraw";
-      typeCell.appendChild(typeBadge);
+  transactionBody.innerHTML = "";
 
-      const categoryCell = document.createElement("td");
-      categoryCell.textContent = t.category_name;
+  slicedData.forEach((t) => {
+    const row = document.createElement("tr");
+    const amount = parseFloat(t.amount);
+    const sign = t.type === "withdraw" ? "-" : "";
+    const date = new Date(t.date).toISOString().split("T")[0];
 
-      const descCell = document.createElement("td");
-      descCell.textContent = t.description;
+    const dateCell = document.createElement("td");
+    dateCell.textContent = date;
 
-      const amountCell = document.createElement("td");
-      amountCell.className = `amount ${t.type}`;
-      amountCell.textContent = `${sign}$${amount.toFixed(2)}`;
+    const typeCell = document.createElement("td");
+    const typeBadge = document.createElement("span");
+    typeBadge.className = `type-badge ${t.type}`;
+    typeBadge.textContent = t.type === "deposit" ? "Deposit" : "Withdraw";
+    typeCell.appendChild(typeBadge);
 
-      // Append all cells to row
-      row.appendChild(dateCell);
-      row.appendChild(typeCell);
-      row.appendChild(categoryCell);
-      row.appendChild(descCell);
-      row.appendChild(amountCell);
+    const categoryCell = document.createElement("td");
+    categoryCell.textContent = t.category_name;
 
-      transactionBody.appendChild(row);
-    });
+    const descCell = document.createElement("td");
+    descCell.textContent = t.description;
+
+    const amountCell = document.createElement("td");
+    amountCell.className = `amount ${t.type}`;
+    amountCell.textContent = `${sign}$${amount.toFixed(2)}`;
+
+    row.appendChild(dateCell);
+    row.appendChild(typeCell);
+    row.appendChild(categoryCell);
+    row.appendChild(descCell);
+    row.appendChild(amountCell);
+
+    transactionBody.appendChild(row);
+  });
+
+  updatePagination(page, data);
+}
+
+function updatePagination(currentPage, data) {
+  const pageCount = Math.ceil(data.length / rowsPerPage);
+  const paginationContainer = document.getElementById("pagination");
+  paginationContainer.innerHTML = "";
+
+  for (let i = 1; i <= pageCount; i++) {
+    const pageLink = document.createElement("a");
+    pageLink.href = "#";
+    pageLink.innerText = i;
+    pageLink.onclick = function () {
+      displayTransactionTable(i, data);
+    };
+
+    if (i === currentPage) {
+      pageLink.style.fontWeight = "bold";
+    }
+    paginationContainer.appendChild(pageLink);
+    paginationContainer.appendChild(document.createTextNode(" "));
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   checkCategories();
-  populateTransactionTable();
+  fetchTransactionTable();
 });
-// document.addEventListener("DOMContentLoaded", populateTransactionTable);
