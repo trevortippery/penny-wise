@@ -15,8 +15,8 @@
 
     --primary-ff: "Inter", serif;
     --p: 400 1rem/1.5em var(--primary-ff); /* font-weight font-size/line-height font-family */
-    --h1: 500 3rem/1.2em var(--primary-ff);
-    --h2: 500 2rem/1.2em var(--primary-ff);
+    --h1: 400 3rem/1.2em var(--primary-ff);
+    --h2: 700 1.5rem/2em var(--primary-ff);
     --spacing1: 4px;
     --spacing2: 8px;
     --spacing3: 16px;
@@ -106,6 +106,19 @@ main {
     display: block;
 }
 
+section {
+    background: var(--bg);
+    border-radius: var(--spacing2);
+    padding: var(--spacing3) var(--spacing3);
+    box-shadow: var(--shadow-s);
+    transition: var(--transition);
+}
+
+section:hover {
+    background: var(--bg-light);
+    transition: var(--transition);
+}
+
 .wrapper {
     display: flex;
     flex-direction: column;
@@ -151,7 +164,7 @@ main {
     grid-template-areas:
         "transactions transactions transactions categories"
         "summary summary summary summary";
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 0.5fr 1.5fr;
     gap: var(--spacing3);
 }
 
@@ -165,4 +178,11 @@ main {
 
 .summary {
     grid-area: summary;
+}
+
+.table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing5);
 }
