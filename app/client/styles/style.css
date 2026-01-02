@@ -7,6 +7,7 @@
 
 :root {
     --primary: oklch(0.7 0.1 223);
+    --secondary: oklch(0.7 0.1 91);
     --bg-dark: oklch(0.92 0 264);
     --bg: oklch(0.96 0 264);
     --bg-light: oklch(1 0 264);
@@ -16,7 +17,7 @@
     --primary-ff: "Inter", serif;
     --p: 400 1rem/1.5em var(--primary-ff); /* font-weight font-size/line-height font-family */
     --h1: 400 3rem/1.2em var(--primary-ff);
-    --h2: 700 1.5rem/2em var(--primary-ff);
+    --h2: 600 1.5rem/2em var(--primary-ff);
     --spacing1: 4px;
     --spacing2: 8px;
     --spacing3: 16px;
@@ -34,6 +35,7 @@
 
 body.dark {
     --primary: oklch(0.7 0.1 91);
+    --secondary: oklch(0.7 0.1 223);
     --bg-dark: oklch(0.3 0 264);
     --bg: oklch(0.4 0 264);
     --bg-light: oklch(0.5 0 264);
@@ -56,6 +58,7 @@ h1 {
 h2 {
     font: var(--h2);
     color: var(--text);
+    letter-spacing: 1px;
 }
 
 h3 {
@@ -84,16 +87,16 @@ body {
 button {
     all: unset;
     display: inline-block;
-    background: var(--bg);
+    background: var(--primary);
     padding: var(--spacing1) var(--spacing2);
-    color: var(--primary);
+    color: var(--text);
     font: var(--p);
     border-radius: 0.5rem;
     box-shadow: var(--shadow-s);
 }
 
 button:hover {
-    background: var(--bg-light);
+    background: var(--secondary);
     transition: var(--transition);
     cursor: pointer;
 }
@@ -109,14 +112,64 @@ main {
 section {
     background: var(--bg);
     border-radius: var(--spacing2);
-    padding: var(--spacing3) var(--spacing3);
+    padding: var(--spacing3);
     box-shadow: var(--shadow-s);
     transition: var(--transition);
 }
 
-section:hover {
-    background: var(--bg-light);
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing3);
+}
+
+thead {
+    border-bottom: 4px solid var(--bg-dark);
+}
+
+th {
+    text-align: left;
+    padding: var(--spacing2) var(--spacing3);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+td {
+    padding: var(--spacing3);
+    color: var(--text);
+    border-bottom: 2px solid var(--bg-dark);
+}
+
+tbody tr {
     transition: var(--transition);
+}
+
+tbody tr:hover {
+    background: var(--bg-light);
+    cursor: pointer;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing2);
+    margin-top: var(--spacing3);
+}
+
+#pagination button {
+    padding: var(--spacing1) var(--spacing3);
+    font-size: 0.875rem;
+}
+
+#pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .wrapper {
@@ -166,6 +219,27 @@ section:hover {
         "summary summary summary summary";
     grid-template-columns: 1fr 1fr 0.5fr 1.5fr;
     gap: var(--spacing3);
+}
+
+/* Tablet view */
+@media (max-width: 1020px) and (min-width: 768px) {
+    .section-cards {
+        grid-template-areas:
+            "transactions transactions"
+            "categories summary";
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Mobile view */
+@media (max-width: 767px) {
+    .section-cards {
+        grid-template-areas:
+            "transactions"
+            "categories"
+            "summary";
+        grid-template-columns: 1fr;
+    }
 }
 
 .transactions {

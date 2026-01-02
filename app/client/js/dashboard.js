@@ -136,6 +136,7 @@ function updatePagination(currentPage, data) {
 
     if (i === currentPage) {
       pageLink.style.fontWeight = "bold";
+      pageLink.style.borderBottom = "1px solid var(--primary)";
     }
     paginationContainer.appendChild(pageLink);
     paginationContainer.appendChild(document.createTextNode(" "));
