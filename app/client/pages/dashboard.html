@@ -4,62 +4,87 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dashboard</title>
-        <link rel="stylesheet" href="../styles/dashboard.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            src="https://kit.fontawesome.com/317084a755.js"
+            crossorigin="anonymous"
+        ></script>
+        <link rel="stylesheet" href="../styles/style.css" />
     </head>
     <body>
-        <nav class="nav">
-            <div class="nav-container">
-                <ul class="nav-menu-first">
-                    <li>
-                        <h1><a href="/dashboard">Home</a></h1>
-                    </li>
-                    <li><a href="/transactions">Transactions</a></li>
-                    <li><a href="/categories">Categories</a></li>
-                </ul>
-                <ul class="nav-menu-second">
-                    <li><a href="/account">Profile</a></li>
-                    <li><button class="sign-out">Sign Out</button></li>
-                </ul>
-            </div>
-        </nav>
+        <div class="wrapper">
+            <header>
+                <nav class="navbar">
+                    <ul class="nav-left">
+                        <li>
+                            <a class="logo-container" href="/dashboard">
+                                <h1 class="logo-text">Home</h1>
+                            </a>
+                        </li>
+                        <li><a href="/transactions">Transactions</a></li>
+                        <li><a href="/categories">Categories</a></li>
+                    </ul>
+                    <ul class="nav-right">
+                        <li>
+                            <span
+                                onclick="toggle()"
+                                class="fa-solid fa-circle-half-stroke theme"
+                            ></span>
+                        </li>
+                        <li><a href="/account">Profile</a></li>
+                        <li><button class="sign-out">Sign Out</button></li>
+                    </ul>
+                </nav>
+            </header>
 
-        <div class="content">
-            <section class="transactions">
-                <div class="table-heading">
-                    <h2>Recent Transactions</h2>
-                    <a href="/addTransaction" class="addTransaction">
-                        Add Transaction
-                    </a>
+            <main>
+                <div class="section-cards">
+                    <section class="transactions">
+                        <div class="table-heading">
+                            <h2>Recent Transactions</h2>
+                            <a href="/addTransaction" class="addTransaction">
+                                Add Transaction
+                            </a>
+                        </div>
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>DATE</th>
+                                    <th>TYPE</th>
+                                    <th>CATEGORY</th>
+                                    <th>DESCRIPTION</th>
+                                    <th>AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody class="transaction-body"></tbody>
+                        </table>
+                        <div id="pagination"></div>
+                    </section>
+
+                    <section class="categories">
+                        <h2>Categories</h2>
+                        <a href="/addCategory">Add Category</a>
+                        <table class="category-table">
+                            <thead>
+                                <tr>
+                                    <th>NAME</th>
+                                    <th>COLOR</th>
+                                </tr>
+                            </thead>
+                            <tbody class="category-body"></tbody>
+                        </table>
+                    </section>
+
+                    <section class="summary"><h2>Summary</h2></section>
                 </div>
-                <table class="transaction-table">
-                    <thead>
-                        <tr>
-                            <th>DATE</th>
-                            <th>TYPE</th>
-                            <th>CATEGORY</th>
-                            <th>DESCRIPTION</th>
-                            <th>AMOUNT</th>
-                        </tr>
-                    </thead>
-                    <tbody class="transaction-body"></tbody>
-                </table>
-                <div id="pagination"></div>
-            </section>
-            <section class="summary"><h2>Summary</h2></section>
-            <section class="categories">
-                <h2>Categories</h2>
-                <a href="/addCategory">Add Category</a>
-                <table class="category-table">
-                    <thead>
-                        <tr>
-                            <th>NAME</th>
-                            <th>COLOR</th>
-                        </tr>
-                    </thead>
-                    <tbody class="category-body"></tbody>
-                </table>
-            </section>
+            </main>
         </div>
+        <script src="../js/theme.js"></script>
         <script src="../js/dashboard.js"></script>
     </body>
 </html>

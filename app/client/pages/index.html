@@ -4,11 +4,17 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Penny-wise</title>
-        <link rel="stylesheet" href="../styles/index.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet"
+        />
         <script
             src="https://kit.fontawesome.com/317084a755.js"
             crossorigin="anonymous"
         ></script>
+        <link rel="stylesheet" href="../styles/style.css" />
     </head>
     <body>
         <nav class="index-nav">
@@ -30,9 +36,11 @@
                         <a href="/register" class="index-nav-link">Sign up</a>
                     </li>
                 </ul>
+                <button onclick="toggle()">Dark/Light Theme</button>
             </div>
         </nav>
         <article class="main-content">1</article>
         <article class="main-content">2</article>
+        <script src="../js/theme.js"></script>
     </body>
 </html>
