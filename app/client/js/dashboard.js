@@ -37,6 +37,22 @@ async function checkCategories() {
     categorySection.appendChild(newPTag);
   } else {
     table.style.display = "table";
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    const nameHeader = document.createElement("th");
+    nameHeader.textContent = "NAME";
+
+    const colorHeader = document.createElement("th");
+    colorHeader.textContent = "COLOR";
+
+    headerRow.appendChild(nameHeader);
+    headerRow.appendChild(colorHeader);
+    thead.appendChild(headerRow);
+
+    table.insertBefore(thead, categoryBody);
+
     categories.categories.forEach((c) => {
       const row = document.createElement("tr");
       const nameCell = document.createElement("td");
@@ -56,6 +72,7 @@ async function checkCategories() {
 async function fetchTransactionTable() {
   const table = document.querySelector(".transaction-table");
   const transactionSection = document.querySelector(".transactions");
+  const transactionBody = document.querySelector(".transactions-body");
 
   const response = await fetch("/api/transactions/", {
     method: "GET",
@@ -72,6 +89,19 @@ async function fetchTransactionTable() {
     transactionSection.appendChild(newPTag);
   } else {
     table.style.display = "table";
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    const headers = ["DATE", "TYPE", "CATEGORY", "DESCRIPTION", "AMOUNT"];
+    headers.forEach((headerText) => {
+      const th = document.createElement("th");
+      th.textContent = headerText;
+      headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.insertBefore(thead, transactionBody);
     displayTransactionTable(currentPage, transaction.transactions);
   }
 }

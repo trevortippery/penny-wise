@@ -109,6 +109,7 @@ main {
     display: block;
 }
 
+table-section,
 section {
     background: var(--bg);
     border-radius: var(--spacing2);
@@ -219,6 +220,7 @@ tbody tr:last-child td {
         "summary summary summary summary";
     grid-template-columns: 1fr 1fr 0.5fr 1.5fr;
     gap: var(--spacing3);
+    align-items: start;
 }
 
 /* Tablet view */

@@ -18,77 +18,34 @@
     </head>
     <body>
         <div class="wrapper">
-            <header>
-                <nav class="navbar">
-                    <ul class="nav-left">
-                        <li>
-                            <a class="logo-container" href="/dashboard">
-                                <h1 class="logo-text">Home</h1>
-                            </a>
-                        </li>
-                        <li><a href="/transactions">Transactions</a></li>
-                        <li><a href="/categories">Categories</a></li>
-                    </ul>
-                    <ul class="nav-right">
-                        <li>
-                            <span
-                                onclick="toggle()"
-                                class="fa-solid fa-circle-half-stroke theme"
-                            ></span>
-                        </li>
-                        <li><a href="/account">Profile</a></li>
-                        <li><button class="sign-out">Sign Out</button></li>
-                    </ul>
-                </nav>
-            </header>
-
+            <a-header></a-header>
             <main>
                 <div class="section-cards">
-                    <section class="transactions">
-                        <div class="table-heading">
-                            <h2>Recent Transactions</h2>
-                            <a href="/addTransaction" class="addTransaction">
-                                <button>Add Transaction</button>
-                            </a>
-                        </div>
-                        <table class="transaction-table">
-                            <thead>
-                                <tr>
-                                    <th>DATE</th>
-                                    <th>TYPE</th>
-                                    <th>CATEGORY</th>
-                                    <th>DESCRIPTION</th>
-                                    <th>AMOUNT</th>
-                                </tr>
-                            </thead>
-                            <tbody class="transaction-body"></tbody>
-                        </table>
-                        <div id="pagination"></div>
-                    </section>
+                    <table-section
+                        sectionClass="transactions"
+                        tableH2="Recent Transactions"
+                        addLink="/addTransaction"
+                        addClass="addTransaction"
+                        buttonText="Add Transaction"
+                        tableClass="transaction-table"
+                        tableBody="transaction-body"
+                    ></table-section>
 
-                    <section class="categories">
-                        <div class="table-heading">
-                            <h2>Categories</h2>
-                            <a href="/addCategory">
-                                <button>Add Category</button>
-                            </a>
-                        </div>
-                        <table class="category-table">
-                            <thead>
-                                <tr>
-                                    <th>NAME</th>
-                                    <th>COLOR</th>
-                                </tr>
-                            </thead>
-                            <tbody class="category-body"></tbody>
-                        </table>
-                    </section>
-
+                    <table-section
+                        sectionClass="categories"
+                        tableH2="Categories"
+                        addLink="/addCategory"
+                        addClass="addCategory"
+                        buttonText="Add Category"
+                        tableClass="category-table"
+                        tableBody="category-body"
+                    ></table-section>
                     <section class="summary"><h2>Summary</h2></section>
                 </div>
             </main>
         </div>
         <script src="../js/theme.js"></script>
+        <script src="../js/script.js"></script>
         <script src="../js/dashboard.js"></script>
     </body>
 </html>
