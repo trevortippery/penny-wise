@@ -173,7 +173,12 @@ function displayTransactionTable(page, data) {
     const row = document.createElement("tr");
     const amount = parseFloat(t.amount);
     const sign = t.type === "withdraw" ? "-" : "";
-    const date = new Date(t.date).toISOString().split("T")[0];
+    const date = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(t.date));
+    // Date(t.date).toISOString().split("T")[0];
 
     const dateCell = document.createElement("td");
     dateCell.textContent = date;
