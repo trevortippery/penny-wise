@@ -156,6 +156,12 @@ tbody tr:last-child td {
     border-bottom: none;
 }
 
+footer {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing4);
+}
+
 #pagination {
     display: flex;
     justify-content: center;
@@ -216,8 +222,8 @@ tbody tr:last-child td {
 .section-cards {
     display: grid;
     grid-template-areas:
-        "transactions transactions transactions categories"
-        "summary summary summary summary";
+        "summary summary summary summary"
+        "transactions transactions transactions categories";
     grid-template-columns: 1fr 1fr 0.5fr 1.5fr;
     gap: var(--spacing3);
     align-items: start;
@@ -227,8 +233,8 @@ tbody tr:last-child td {
 @media (max-width: 1020px) and (min-width: 768px) {
     .section-cards {
         grid-template-areas:
-            "transactions transactions"
-            "categories summary";
+            "summary categories"
+            "transactions transactions";
         grid-template-columns: 1fr 1fr;
     }
 }
@@ -237,9 +243,9 @@ tbody tr:last-child td {
 @media (max-width: 767px) {
     .section-cards {
         grid-template-areas:
+            "summary"
             "transactions"
-            "categories"
-            "summary";
+            "categories";
         grid-template-columns: 1fr;
     }
 }
@@ -268,4 +274,24 @@ tbody tr:last-child td {
     display: flex;
     justify-content: center;
     gap: var(--spacing2);
+}
+
+.bar-container {
+    width: 100%;
+    height: 40px;
+    background-color: #4caf50; /* Green for remaining */
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.bar-spent {
+    height: 100%;
+    background-color: #f44336; /* Red for spent */
+    transition: width 0.3s ease;
+}
+
+.summary-labels {
+    display: flex;
+    justify-content: space-between;
 }

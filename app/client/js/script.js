@@ -60,3 +60,12 @@ class TableSection extends HTMLElement {
   }
 }
 customElements.define("table-section", TableSection);
+
+class AFooter extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = `
+      <footer><span>&copy; 2026 Penny-Wise. Practice Project.<span></footer>
+      `;
+  }
+}
+customElements.define("a-footer", AFooter);

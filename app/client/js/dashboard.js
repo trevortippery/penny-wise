@@ -136,6 +136,7 @@ async function fetchTransactionTable() {
     },
   });
   const transaction = await response.json();
+  console.log(transaction);
 
   if (!transaction.transactions || transaction.transactions.length === 0) {
     table.style.display = "none";
@@ -159,6 +160,8 @@ async function fetchTransactionTable() {
     table.insertBefore(thead, transactionBody);
     displayTransactionTable(currentPage, transaction.transactions);
   }
+
+  return transaction.transactions;
 }
 
 function displayTransactionTable(page, data) {
@@ -233,7 +236,47 @@ function updatePagination(currentPage, data) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   checkCategories();
-  fetchTransactionTable();
+  const transactions = await fetchTransactionTable();
+  console.log(transactions);
+  displaySummarySection(transactions);
 });
+
+function displaySummarySection(data) {
+  const withdraws = data.filter((t) => t.type === "withdraw");
+  const deposits = data.filter((t) => t.type === "deposit");
+  console.log(withdraws);
+  console.log(deposits);
+
+  const withdrawTotal = withdraws.reduce(
+    (accumulator, withdraw) => accumulator + parseFloat(withdraw.amount),
+    0,
+  );
+  const depositTotal = deposits.reduce(
+    (accumulator, deposit) => accumulator + parseFloat(deposit.amount),
+    0,
+  );
+
+  const remaining = depositTotal - withdrawTotal;
+
+  const spentPercentage =
+    depositTotal > 0 ? (withdrawTotal / depositTotal) * 100 : 0;
+
+  // Build the HTML
+  const summaryHTML = `
+      <div class="summary-container">
+        <h2>Summary</h2>
+        <h3>Income: $${depositTotal.toFixed(2)}</h3>
+        <div class="bar-container">
+          <div class="bar-spent" style="width: ${spentPercentage}%"></div>
+        </div>
+        <div class="summary-labels">
+          <span class="spent-label">Spent: $${withdrawTotal.toFixed(2)}</span>
+          <span class="remaining-label">Remaining: $${remaining.toFixed(2)}</span>
+        </div>
+      </div>
+    `;
+
+  document.querySelector(".summary").innerHTML = summaryHTML;
+}
