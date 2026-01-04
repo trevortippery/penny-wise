@@ -262,3 +262,10 @@ tbody tr:last-child td {
     justify-content: space-between;
     gap: var(--spacing5);
 }
+
+.transaction-pagination,
+.category-pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing2);
+}
