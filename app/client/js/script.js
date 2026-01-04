@@ -40,6 +40,7 @@ class TableSection extends HTMLElement {
     const buttonText = this.getAttribute("buttonText");
     const tableClass = this.getAttribute("tableClass");
     const tableBody = this.getAttribute("tableBody");
+    const tablePagination = this.getAttribute("tablePagination");
 
     this.className = sectionClass;
 
@@ -54,7 +55,7 @@ class TableSection extends HTMLElement {
 
             <tbody class="${tableBody}"></tbody>
         </table>
-        <div id="pagination"></div>
+        <div class="${tablePagination}"></div>
     `;
   }
 }

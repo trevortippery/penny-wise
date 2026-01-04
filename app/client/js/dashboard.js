@@ -1,6 +1,8 @@
 const token = localStorage.getItem("token");
 let currentPage = 1;
+let currentCategoryPage = 1;
 const rowsPerPage = 5;
+const categoriesPerPage = 5;
 
 if (!token) {
   window.location.href = "/";
@@ -53,19 +55,72 @@ async function checkCategories() {
 
     table.insertBefore(thead, categoryBody);
 
-    categories.categories.forEach((c) => {
-      const row = document.createElement("tr");
-      const nameCell = document.createElement("td");
-      nameCell.textContent = c.name;
+    displayCategoryTable(currentCategoryPage, categories.categories);
+  }
+}
 
-      const colorCell = document.createElement("td");
-      colorCell.textContent = c.color;
+function displayCategoryTable(page, data) {
+  const startIndex = (page - 1) * categoriesPerPage;
+  const endIndex = startIndex + categoriesPerPage;
+  const slicedData = data.slice(startIndex, endIndex);
+  const categoryBody = document.querySelector(".category-body");
 
-      row.appendChild(nameCell);
-      row.appendChild(colorCell);
+  categoryBody.innerHTML = "";
 
-      categoryBody.appendChild(row);
-    });
+  slicedData.forEach((c) => {
+    const row = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    nameCell.textContent = c.name;
+
+    const colorCell = document.createElement("td");
+    const colorCircle = document.createElement("span");
+    colorCircle.style.display = "inline-block";
+    colorCircle.style.width = "var(--spacing5)";
+    colorCircle.style.height = "var(--spacing3)";
+    colorCircle.style.borderRadius = "3px";
+    colorCircle.style.backgroundColor = c.color;
+    colorCell.appendChild(colorCircle);
+
+    row.appendChild(nameCell);
+    row.appendChild(colorCell);
+
+    categoryBody.appendChild(row);
+  });
+
+  updateCategoryPagination(page, data);
+}
+
+function updateCategoryPagination(currentPage, data) {
+  const pageCount = Math.ceil(data.length / categoriesPerPage);
+  let paginationContainer = document.querySelector(".category-pagination");
+
+  // Create pagination container if it doesn't exist
+  if (!paginationContainer) {
+    paginationContainer = document.createElement("div");
+    paginationContainer.className = "category-pagination";
+    paginationContainer.style.marginTop = "10px";
+    const categorySection = document.querySelector(".categories");
+    categorySection.appendChild(paginationContainer);
+  }
+
+  paginationContainer.innerHTML = "";
+
+  for (let i = 1; i <= pageCount; i++) {
+    const pageLink = document.createElement("a");
+    pageLink.href = "#";
+    pageLink.innerText = i;
+    pageLink.onclick = function (e) {
+      e.preventDefault();
+      currentCategoryPage = i;
+      displayCategoryTable(i, data);
+    };
+
+    if (i === currentPage) {
+      pageLink.style.fontWeight = "bold";
+      pageLink.style.borderBottom = "1px solid var(--primary)";
+    }
+    paginationContainer.appendChild(pageLink);
+    paginationContainer.appendChild(document.createTextNode(" "));
   }
 }
 
@@ -153,7 +208,7 @@ function displayTransactionTable(page, data) {
 
 function updatePagination(currentPage, data) {
   const pageCount = Math.ceil(data.length / rowsPerPage);
-  const paginationContainer = document.getElementById("pagination");
+  const paginationContainer = document.querySelector(".transaction-pagination");
   paginationContainer.innerHTML = "";
 
   for (let i = 1; i <= pageCount; i++) {
