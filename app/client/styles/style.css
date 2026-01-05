@@ -164,19 +164,59 @@ a-footer {
 }
 
 label {
-    margin-bottom: var(--spacing1);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    text-transform: uppercase;
 }
 
-select,
 input,
+select,
 textarea {
-    margin-bottom: var(--spacing3);
-    width: var(--spacing7);
+    padding: var(--spacing3);
+    border: 2px solid var(--bg-dark);
+    border-radius: var(--spacing2);
+    background: var(--bg-light);
+    color: var(--text);
+    transition: var(--transition);
+    outline: none;
 }
 
-#add-transaction {
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px oklch(0.7 0.1 223 / 0.1);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: var(--text-muted);
+    cursor: pointer;
+}
+
+select {
+    cursor: pointer;
+    appearance: none;
+    padding-right: var(--spacing5);
+}
+
+input {
+    border-radius: var(--spacing3);
+    padding: 1ex 2ex;
+    accent-color: var(--primary);
+}
+
+textarea {
+    min-height: var(--spacing6);
+    resize: vertical;
+}
+form {
     display: flex;
     flex-direction: column;
+    gap: var(--spacing4);
 }
 
 .wrapper {
@@ -297,6 +337,43 @@ textarea {
     justify-content: space-between;
 }
 
-.transaction-form-section {
-    width: 400px;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing2);
+}
+
+.form-section {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-section button {
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.form-section button[type="submit"] {
+    padding: var(--spacing3) var(--spacing5);
+    margin-top: var(--spacing3);
+    transition: var(--transition);
+    align-self: center;
+}
+
+.form-section button[type="submit"]:hover {
+    box-shadow: var(--shadow-m);
+}
+
+.form-section button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+.form-section a {
+    display: inline-block;
+    margin-top: var(--spacing4);
+    font-size: 0.875rem;
+}
+
+.category-name {
+    width: 250px;
 }
