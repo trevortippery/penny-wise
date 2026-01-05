@@ -136,7 +136,6 @@ async function fetchTransactionTable() {
     },
   });
   const transaction = await response.json();
-  console.log(transaction);
 
   if (!transaction.transactions || transaction.transactions.length === 0) {
     table.style.display = "none";
@@ -239,15 +238,12 @@ function updatePagination(currentPage, data) {
 document.addEventListener("DOMContentLoaded", async () => {
   checkCategories();
   const transactions = await fetchTransactionTable();
-  console.log(transactions);
   displaySummarySection(transactions);
 });
 
 function displaySummarySection(data) {
   const withdraws = data.filter((t) => t.type === "withdraw");
   const deposits = data.filter((t) => t.type === "deposit");
-  console.log(withdraws);
-  console.log(deposits);
 
   const withdrawTotal = withdraws.reduce(
     (accumulator, withdraw) => accumulator + parseFloat(withdraw.amount),
