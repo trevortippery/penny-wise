@@ -4,24 +4,42 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Add Category</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            src="https://kit.fontawesome.com/317084a755.js"
+            crossorigin="anonymous"
+        ></script>
+        <link rel="stylesheet" href="../styles/style.css" />
     </head>
     <body>
-        <form id="addCategory" onsubmit="validateCategoryForm(event)">
-            <h1>Add Category</h1>
-            <label for="name">Category name</label>
-            <input type="text" id="name" name="name" />
-            <label for="categoryColor">
-                Select color to represent the category
-            </label>
-            <input
-                type="color"
-                id="categoryColor"
-                name="categoryColor"
-                value="#ff0000"
-            />
-            <input type="submit" value="Submit" />
-        </form>
-        <a href="/dashboard">Back to dashboard</a>
+        <div class="wrapper">
+            <a-header></a-header>
+            <form id="addCategory" onsubmit="validateCategoryForm(event)">
+                <h1>Add Category</h1>
+                <label for="name">Category name</label>
+                <input type="text" id="name" name="name" />
+                <label for="categoryColor">
+                    Select color to represent the category
+                </label>
+                <input
+                    type="color"
+                    id="categoryColor"
+                    name="categoryColor"
+                    value="#ff0000"
+                />
+                <input type="submit" value="Submit" />
+            </form>
+
+            <a href="/dashboard">Back to dashboard</a>
+            <a-footer></a-footer>
+        </div>
+        <script src="../js/theme.js"></script>
+        <script src="../js/script.js"></script>
         <script src="../js/forms.js"></script>
     </body>
 </html>

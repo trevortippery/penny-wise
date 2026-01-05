@@ -4,27 +4,61 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Create Transaction</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            src="https://kit.fontawesome.com/317084a755.js"
+            crossorigin="anonymous"
+        ></script>
+        <link rel="stylesheet" href="../styles/style.css" />
     </head>
     <body>
-        <form id="addTransaction" onsubmit="validateTransactionForm(event)">
-            <h1>Add Transaction</h1>
-            <label for="type">Type</label>
-            <select id="type" name="type">
-                <option value="" disabled selected>Select a type</option>
-                <option value="deposit">Deposit</option>
-                <option value="withdraw">Withdraw</option>
-            </select>
-            <label for="category">Category</label>
-            <select id="category" name="category"></select>
-            <label for="amount">Amount</label>
-            <input type="number" step="0.01" id="amount" name="amount" />
-            <label for="description">Description</label>
-            <textarea id="description" name="description"></textarea>
-            <label for="date">Date</label>
-            <input type="date" id="date" name="date" />
-            <button type="submit">Add Transaction</button>
-        </form>
-        <a href="/dashboard">Back to dashboard</a>
+        <div class="wrapper">
+            <a-header></a-header>
+            <main>
+                <section class="transaction-form-section">
+                    <form
+                        id="add-transaction"
+                        onsubmit="validateTransactionForm(event)"
+                    >
+                        <h1>Add Transaction</h1>
+                        <label for="type">Type</label>
+                        <select id="type" name="type">
+                            <option value="" disabled selected>
+                                Select a type
+                            </option>
+                            <option value="deposit">Deposit</option>
+                            <option value="withdraw">Withdraw</option>
+                        </select>
+                        <label for="category">Category</label>
+                        <select id="category" name="category"></select>
+                        <label for="amount">Amount</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="amount"
+                            name="amount"
+                        />
+                        <label for="description">Description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                        ></textarea>
+                        <label for="date">Date</label>
+                        <input type="date" id="date" name="date" />
+                        <button type="submit">Add Transaction</button>
+                        <a href="/dashboard">Back to dashboard</a>
+                    </form>
+                </section>
+            </main>
+            <a-footer></a-footer>
+        </div>
+        <script src="../js/theme.js"></script>
+        <script src="../js/script.js"></script>
         <script src="../js/transactions.js"></script>
         <script src="../js/forms.js"></script>
     </body>
