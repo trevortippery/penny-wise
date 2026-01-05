@@ -160,14 +160,16 @@ a-footer {
     margin-top: auto;
     display: flex;
     justify-content: center;
-    padding: var(--spacing4) 0:
+    padding: var(--spacing4) 0;
 }
 
 label {
     margin-bottom: var(--spacing1);
 }
 
-select, input, textarea {
+select,
+input,
+textarea {
     margin-bottom: var(--spacing3);
     width: var(--spacing7);
 }
