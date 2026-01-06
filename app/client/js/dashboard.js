@@ -148,14 +148,7 @@ async function fetchTransactionTable() {
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
 
-    const headers = [
-      "DATE",
-      "TYPE",
-      "CATEGORY",
-      "DESCRIPTION",
-      "AMOUNT",
-      "ACTIONS",
-    ];
+    const headers = ["DATE", "TYPE", "CATEGORY", "AMOUNT", "ACTIONS"];
     headers.forEach((headerText) => {
       const th = document.createElement("th");
       th.textContent = headerText;
@@ -183,15 +176,10 @@ function displayTransactionTable(page, data) {
     const row = document.createElement("tr");
     const amount = parseFloat(t.amount);
     const sign = t.type === "withdraw" ? "-" : "";
-    const date = new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date(t.date));
-    // Date(t.date).toISOString().split("T")[0];
 
+    const date = t.date.split("T")[0].split("-");
     const dateCell = document.createElement("td");
-    dateCell.textContent = date;
+    dateCell.textContent = `${date[1]}/${date[2]}/${date[0]}`;
 
     const typeCell = document.createElement("td");
     const typeBadge = document.createElement("span");
@@ -202,9 +190,6 @@ function displayTransactionTable(page, data) {
     const categoryCell = document.createElement("td");
     categoryCell.textContent = t.category_name;
 
-    const descCell = document.createElement("td");
-    descCell.textContent = t.description;
-
     const amountCell = document.createElement("td");
     amountCell.className = `amount ${t.type}`;
     amountCell.textContent = `${sign}$${amount.toFixed(2)}`;
@@ -212,7 +197,9 @@ function displayTransactionTable(page, data) {
     const actionsCell = document.createElement("td");
 
     const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
+    const editIcon = document.createElement("span");
+    editIcon.className = "fa-solid fa-pen";
+    editButton.appendChild(editIcon);
     editButton.className = "edit-btn";
     editButton.onclick = function (e) {
       e.stopPropagation();
@@ -220,7 +207,9 @@ function displayTransactionTable(page, data) {
     };
 
     const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
+    const deleteIcon = document.createElement("span");
+    deleteIcon.className = "fa-solid fa-trash-can";
+    deleteButton.appendChild(deleteIcon);
     deleteButton.className = "delete-btn";
     deleteButton.onclick = async function (e) {
       e.stopPropagation();
@@ -235,7 +224,6 @@ function displayTransactionTable(page, data) {
     row.appendChild(dateCell);
     row.appendChild(typeCell);
     row.appendChild(categoryCell);
-    row.appendChild(descCell);
     row.appendChild(amountCell);
     row.appendChild(actionsCell);
 

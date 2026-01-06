@@ -8,6 +8,7 @@
 :root {
     --primary: oklch(0.7 0.1 223);
     --secondary: oklch(0.7 0.1 91);
+    --red: oklch(0.65 0.2 25);
     --bg-dark: oklch(0.92 0 264);
     --bg: oklch(0.96 0 264);
     --bg-light: oklch(1 0 264);
@@ -58,7 +59,6 @@ h1 {
 h2 {
     font: var(--h2);
     color: var(--text);
-    letter-spacing: 1px;
 }
 
 h3 {
@@ -122,6 +122,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: var(--spacing3);
+    table-layout: fixed;
 }
 
 thead {
@@ -143,13 +144,19 @@ td {
     border-bottom: 2px solid var(--bg-dark);
 }
 
+th,
+td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
 tbody tr {
     transition: var(--transition);
 }
 
 tbody tr:hover {
     background: var(--bg-light);
-    cursor: pointer;
 }
 
 tbody tr:last-child td {
@@ -199,8 +206,7 @@ textarea:hover {
 
 select {
     cursor: pointer;
-    appearance: none;
-    padding-right: var(--spacing5);
+    padding-right: var(--spacing4);
 }
 
 input {
@@ -213,6 +219,7 @@ textarea {
     min-height: var(--spacing6);
     resize: vertical;
 }
+
 form {
     display: flex;
     flex-direction: column;
@@ -263,25 +270,19 @@ form {
 .section-cards {
     display: grid;
     grid-template-areas:
-        "summary summary summary summary"
-        "transactions transactions transactions categories";
-    grid-template-columns: 1fr 1fr 0.5fr 1.5fr;
+        "summary summary summary summary summary"
+        "transactions transactions transactions transactions categories";
+    grid-template-columns: 1fr 1fr 1fr 0.5fr 1.5fr;
     gap: var(--spacing3);
     align-items: start;
 }
 
-/* Tablet view */
-@media (max-width: 1020px) and (min-width: 768px) {
-    .section-cards {
-        grid-template-areas:
-            "summary categories"
-            "transactions transactions";
-        grid-template-columns: 1fr 1fr;
-    }
+.section-cards > * {
+    min-width: 0;
 }
 
-/* Mobile view */
-@media (max-width: 767px) {
+/* Tablet & mobile view */
+@media (max-width: 1060px) {
     .section-cards {
         grid-template-areas:
             "summary"
@@ -291,8 +292,40 @@ form {
     }
 }
 
+@media (max-width: 600px) {
+    .category-name {
+        width: auto;
+    }
+}
+
 .transactions {
     grid-area: transactions;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.transactions table {
+    min-width: 600px;
+}
+
+@media (max-width: 600px) {
+    .transactions table {
+        min-width: 700px;
+    }
+
+    th,
+    td {
+        padding: var(--spacing2);
+    }
+
+    table-section,
+    .transactions {
+        padding: var(--spacing2);
+    }
+
+    .category-name {
+        width: auto;
+    }
 }
 
 .categories {
@@ -376,4 +409,16 @@ form {
 
 .category-name {
     width: 250px;
+}
+
+.edit-btn {
+    background: var(--bg-dark);
+    margin-right: var(--spacing1);
+}
+
+.delete-btn {
+    background: var(--bg-dark);
+}
+.delete-btn:hover {
+    background: var(--red);
 }
