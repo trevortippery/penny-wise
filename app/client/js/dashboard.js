@@ -148,7 +148,14 @@ async function fetchTransactionTable() {
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
 
-    const headers = ["DATE", "TYPE", "CATEGORY", "DESCRIPTION", "AMOUNT"];
+    const headers = [
+      "DATE",
+      "TYPE",
+      "CATEGORY",
+      "DESCRIPTION",
+      "AMOUNT",
+      "ACTIONS",
+    ];
     headers.forEach((headerText) => {
       const th = document.createElement("th");
       th.textContent = headerText;
@@ -164,6 +171,7 @@ async function fetchTransactionTable() {
 }
 
 function displayTransactionTable(page, data) {
+  // console.log(data);
   const startIndex = (page - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const slicedData = data.slice(startIndex, endIndex);
@@ -201,11 +209,35 @@ function displayTransactionTable(page, data) {
     amountCell.className = `amount ${t.type}`;
     amountCell.textContent = `${sign}$${amount.toFixed(2)}`;
 
+    const actionsCell = document.createElement("td");
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.className = "edit-btn";
+    editButton.onclick = function (e) {
+      e.stopPropagation();
+      window.location.href = `/transaction/edit/${t.id}`;
+    };
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "delete-btn";
+    deleteButton.onclick = async function (e) {
+      e.stopPropagation();
+      if (confirm("Are you sure you want to delete this transaction?")) {
+        await deleteTransaction(t.id);
+      }
+    };
+
+    actionsCell.appendChild(editButton);
+    actionsCell.appendChild(deleteButton);
+
     row.appendChild(dateCell);
     row.appendChild(typeCell);
     row.appendChild(categoryCell);
     row.appendChild(descCell);
     row.appendChild(amountCell);
+    row.appendChild(actionsCell);
 
     transactionBody.appendChild(row);
   });
@@ -275,4 +307,25 @@ function displaySummarySection(data) {
     `;
 
   document.querySelector(".summary").innerHTML = summaryHTML;
+}
+
+async function deleteTransaction(transactionId) {
+  try {
+    const response = await fetch(`/api/transactions/${transactionId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.ok) {
+      alert("Transaction deleted successfully!");
+      window.location.reload();
+    } else {
+      alert("Failed to delete transaction");
+    }
+  } catch (err) {
+    console.error("Error deleting transaction:", err);
+    alert("An error occurred while deleting the transaction");
+  }
 }
