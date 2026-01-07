@@ -44,8 +44,12 @@ async function checkCategories() {
     const colorHeader = document.createElement("th");
     colorHeader.textContent = "COLOR";
 
+    const actionsHeader = document.createElement("th");
+    actionsHeader.textContent = "ACTIONS";
+
     headerRow.appendChild(nameHeader);
     headerRow.appendChild(colorHeader);
+    headerRow.appendChild(actionsHeader);
     thead.appendChild(headerRow);
 
     table.insertBefore(thead, categoryBody);
@@ -76,8 +80,40 @@ function displayCategoryTable(page, data) {
     colorCircle.style.backgroundColor = c.color;
     colorCell.appendChild(colorCircle);
 
+    const actionsCell = document.createElement("td");
+
+    const editButton = document.createElement("button");
+    const editIcon = document.createElement("span");
+    editIcon.className = "fa-solid fa-pen";
+    editButton.appendChild(editIcon);
+    editButton.className = "edit-btn";
+    editButton.onclick = function (e) {
+      e.stopPropagation();
+      window.location.href = `/category/edit/${c.id}`;
+    };
+
+    const deleteButton = document.createElement("button");
+    const deleteIcon = document.createElement("span");
+    deleteIcon.className = "fa-solid fa-trash-can";
+    deleteButton.appendChild(deleteIcon);
+    deleteButton.className = "delete-btn";
+    deleteButton.onclick = async function (e) {
+      e.stopPropagation();
+      if (
+        confirm(
+          "Are you sure you want to delete this category? It will also delete the transaction(s) associated with the category?",
+        )
+      ) {
+        await deleteCategory(c.id);
+      }
+    };
+
+    actionsCell.appendChild(editButton);
+    actionsCell.appendChild(deleteButton);
+
     row.appendChild(nameCell);
     row.appendChild(colorCell);
+    row.append(actionsCell);
 
     categoryBody.appendChild(row);
   });
@@ -309,6 +345,27 @@ async function deleteTransaction(transactionId) {
     }
   } catch (err) {
     console.error("Error deleting transaction:", err);
-    alert("An error occurred while deleting the transaction");
+    alert("An error occurred while deleting the transaction.");
+  }
+}
+
+async function deleteCategory(categoryId) {
+  try {
+    const response = await fetch(`/api/categories/${categoryId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.ok) {
+      alert("Category deleted successfully!");
+      window.location.reload();
+    } else {
+      alert("Failed to delete category");
+    }
+  } catch (err) {
+    console.error("Error deleting category:", err);
+    alert("An error occurred while deleting the category.");
   }
 }

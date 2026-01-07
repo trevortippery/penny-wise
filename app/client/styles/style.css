@@ -271,8 +271,8 @@ form {
     display: grid;
     grid-template-areas:
         "summary summary summary summary summary"
-        "transactions transactions transactions transactions categories";
-    grid-template-columns: 1fr 1fr 1fr 0.5fr 1.5fr;
+        "transactions transactions transactions categories categories";
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     gap: var(--spacing3);
     align-items: start;
 }
