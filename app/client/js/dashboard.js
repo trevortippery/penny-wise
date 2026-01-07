@@ -1,12 +1,7 @@
-const token = localStorage.getItem("token");
 let currentPage = 1;
 let currentCategoryPage = 1;
 const rowsPerPage = 5;
 const categoriesPerPage = 5;
-
-if (!token) {
-  window.location.href = "/";
-}
 
 const signOutButton = document.querySelector(".sign-out");
 signOutButton.addEventListener("click", () => {

@@ -114,3 +114,45 @@ function validateCategoryForm(event) {
     fieldMap: { categoryColor: "color" },
   });
 }
+
+async function editTransactionForm(event) {
+  event.preventDefault();
+
+  const token = localStorage.getItem("token");
+  const urlPath = window.location.pathname;
+  const transactionId = urlPath.split("/").pop();
+
+  const formData = {
+    type: document.getElementById("type").value,
+    category_id: document.getElementById("category").value,
+    amount: document.getElementById("amount").value,
+    description: document.getElementById("description").value,
+    date: document.getElementById("date").value,
+  };
+
+  formData.amount = parseFloat(formData.amount);
+
+  try {
+    const response = await fetch(`/api/transactions/${transactionId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+      alert("Transaction updated successfully!");
+      window.location.href = "/dashboard";
+    } else {
+      const error = await response.json();
+      alert(
+        `Failed to update transaction: ${error.message || "Unknown error"}`,
+      );
+    }
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    alert("An error occurred while updating the transaction");
+  }
+}

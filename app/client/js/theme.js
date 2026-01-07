@@ -1,3 +1,9 @@
+const token = localStorage.getItem("token");
+
+if (!token) {
+  window.location.href = "/";
+}
+
 let currentTheme = localStorage.getItem("theme") || "light"; // default to light
 if (currentTheme === "dark") {
   document.body.classList.add("dark");
