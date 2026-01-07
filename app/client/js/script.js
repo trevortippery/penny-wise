@@ -69,3 +69,59 @@ class AFooter extends HTMLElement {
   }
 }
 customElements.define("a-footer", AFooter);
+
+class FSection extends HTMLElement {
+  connectedCallback() {
+    const formSubmissionFn = this.getAttribute("formSubmissionFn");
+    const buttonText = this.getAttribute("buttonText");
+    const h2Text = this.getAttribute("h2Text");
+    this.innerHTML = `
+      <section class="form-section">
+        <h2>${h2Text}</h2>
+        <form onsubmit="${formSubmissionFn}">
+            <div class="form-group">
+                <label for="type">Type *</label>
+                <select id="type" name="type" required>
+                  <option value="" disabled selected>
+                      Select a type
+                  </option>
+                  <option value="deposit">Deposit</option>
+                  <option value="withdraw">Withdraw</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select
+                    id="category"
+                    name="category"
+                    required
+                ></select>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount *</label>
+                <input
+                    type="number"
+                    step="0.01"
+                    id="amount"
+                    name="amount"
+                    required
+                />
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea
+                    id="description"
+                    name="description"
+                ></textarea>
+            </div>
+            <div class="form-group">
+                <label for="date">Date *</label>
+                <input type="date" id="date" name="date" required />
+            </div>
+            <button type="submit">${buttonText}</button>
+        </form>
+        <a href="/dashboard"><- Back to dashboard</a>
+      </section>`;
+  }
+}
+customElements.define("f-section", FSection);
