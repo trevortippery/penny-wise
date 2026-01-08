@@ -125,3 +125,43 @@ class FSection extends HTMLElement {
   }
 }
 customElements.define("f-section", FSection);
+
+// Form, category, section (FCSection)
+class FCSection extends HTMLElement {
+  connectedCallback() {
+    const formSubmissionFn = this.getAttribute("formSubmissionFn");
+    const text = this.getAttribute("text");
+
+    this.innerHTML = `
+      <section class="form-section">
+          <h2>${text}</h2>
+          <form onsubmit="${formSubmissionFn}">
+              <div class="form-group">
+                  <label for="name">Category name *</label>
+                  <input
+                      class="category-name"
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                  />
+              </div>
+              <div class="form-group">
+                  <label for="categoryColor">
+                      Select color to represent the category
+                  </label>
+                  <input
+                      type="color"
+                      id="categoryColor"
+                      name="categoryColor"
+                      value="#ff0000"
+                  />
+              </div>
+              <button type="submit">${text}</button>
+          </form>
+          <a href="/dashboard"><- Back to dashboard</a>
+      </section>`;
+  }
+}
+
+customElements.define("fc-section", FCSection);

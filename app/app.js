@@ -56,6 +56,10 @@ app.get("/transaction/edit/:id", (req, res) => {
   res.sendFile(path.join(viewsDir, "editTransaction.html"));
 });
 
+app.get("/category/edit/:id", (req, res) => {
+  res.sendFile(path.join(viewsDir, "editCategory.html"));
+});
+
 app.get("");
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);

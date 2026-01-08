@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Add Category</title>
+        <title>Edit Category</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -21,15 +21,14 @@
             <a-header></a-header>
             <main>
                 <fc-section
-                    formSubmissionFn="validateCategoryForm(event)"
-                    text="Add Category"
-                ></fc-section
+                    text="Edit Category"
+                    formSubmissionFn="editCategoryForm(event)"
+                ></fc-section>
             </main>
-
-            <a-footer></a-footer>
         </div>
         <script src="/js/theme.js"></script>
         <script src="/js/script.js"></script>
         <script src="/js/forms.js"></script>
+        <script src="/js/editCategory.js"></script>
     </body>
 </html>

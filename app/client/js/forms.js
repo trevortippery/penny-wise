@@ -156,3 +156,38 @@ async function editTransactionForm(event) {
     alert("An error occurred while updating the transaction");
   }
 }
+
+async function editCategoryForm(event) {
+  event.preventDefault();
+
+  const token = localStorage.getItem("token");
+  const urlPath = window.location.pathname;
+  const categoryId = urlPath.split("/").pop();
+
+  const formData = {
+    name: document.getElementById("name").value,
+    color: document.getElementById("categoryColor").value,
+  };
+
+  try {
+    const response = await fetch(`/api/categories/${categoryId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+      alert("Category updated successfully!");
+      window.location.href = "/dashboard";
+    } else {
+      const error = await response.json();
+      alert(`Failed to update category: ${error.message || "Unknown error"}`);
+    }
+  } catch (error) {
+    console.error("Error updating category:", error);
+    alert("An error occurred while updating the category");
+  }
+}
