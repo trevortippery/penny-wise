@@ -422,3 +422,14 @@ form {
 .delete-btn:hover {
     background: var(--red);
 }
+
+.login-a-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--spacing5);
+}
+
+.login-a-links a {
+    margin-top: 0;
+}
