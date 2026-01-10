@@ -3,12 +3,6 @@ let currentCategoryPage = 1;
 const rowsPerPage = 5;
 const categoriesPerPage = 5;
 
-const signOutButton = document.querySelector(".sign-out");
-signOutButton.addEventListener("click", () => {
-  localStorage.clear();
-  window.location.href = "/";
-});
-
 const addTransactionButton = document.querySelector(".addTransaction");
 
 async function checkCategories() {
