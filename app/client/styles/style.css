@@ -433,3 +433,7 @@ form {
 .login-a-links a {
     margin-top: 0;
 }
+
+.disabled-input {
+    opacity: 0.4;
+}
