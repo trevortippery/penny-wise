@@ -48,7 +48,7 @@ function displayProfile(data) {
 
       <div class="profile-section">
         <h2>Change Password</h2>
-        <form id="password-change-form">
+        <form onsubmit="handlePasswordChange(event)">
           <div class="form-group">
             <label for="current-password">Current Password</label>
             <input
@@ -89,17 +89,57 @@ function displayProfile(data) {
     </div>
     <a href="/dashboard"><- Back to dashboard</a>
   `;
-
-  document
-    .getElementById("password-change-form")
-    .addEventListener("submit", handlePasswordChange);
 }
 
 async function handlePasswordChange(e) {
-  // Need to implement
-  alert(
-    "Made it! However, nothing changed because it still needs to be implemented.",
-  );
+  e.preventDefault();
+
+  const currentPassword = document.getElementById("current-password").value;
+  const newPassword = document.getElementById("new-password").value;
+  const confirmPassword = document.getElementById("confirm-password").value;
+
+  if (newPassword !== confirmPassword) {
+    alert("New passwords do not match");
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    alert("New password must be at least 8 characters");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`/api/auth/change-password`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("token", data.token);
+
+      alert("Password updated successfully!");
+
+      document.getElementById("current-password").value = "";
+      document.getElementById("new-password").value = "";
+      document.getElementById("confirm-password").value = "";
+    } else {
+      alert(`Failed to update password: ${data.error || "Unknown error"}`);
+    }
+  } catch (error) {
+    console.error("Error updating password:", error);
+    alert("An error occurred while updating password");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", getProfileData);

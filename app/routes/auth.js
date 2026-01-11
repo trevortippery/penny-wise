@@ -130,4 +130,78 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 
+router.patch("/change-password", verifyToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || currentPassword.trim() === "") {
+      return res.status(400).json({ error: "Current password is required" });
+    }
+
+    if (!newPassword || newPassword.trim() === "") {
+      return res.status(400).json({ error: "New password is required" });
+    }
+
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "New password must be at least 8 characters" });
+    }
+
+    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [
+      req.user.userId,
+    ]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const user = rows[0];
+
+    const isCurrentPasswordValid = await comparePasswords(
+      currentPassword,
+      user.password_hash,
+    );
+
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Check if new password is different from old password
+    const isSamePassword = await comparePasswords(
+      newPassword,
+      user.password_hash,
+    );
+    if (isSamePassword) {
+      return res.status(400).json({
+        error: "New password must be different from current password",
+      });
+    }
+
+    const newHashedPassword = await hashPassword(newPassword);
+
+    await pool.query(
+      "UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2",
+      [newHashedPassword, req.user.userId],
+    );
+
+    const newToken = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" },
+    );
+
+    res.status(200).json({
+      message: "Password updated successfully",
+      token: newToken,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
