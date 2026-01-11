@@ -32,13 +32,13 @@ app.get("/about", (req, res) => {
   res.sendFile(path.join(viewsDir, "about.html"));
 });
 
-app.get("/transactions", (req, res) => {
-  res.sendFile(path.join(viewsDir, "transactions.html"));
-});
+// app.get("/transactions", (req, res) => {
+//   res.sendFile(path.join(viewsDir, "transactions.html"));
+// });
 
-app.get("/categories", (req, res) => {
-  res.sendFile(path.join(viewsDir, "categories.html"));
-});
+// app.get("/categories", (req, res) => {
+//   res.sendFile(path.join(viewsDir, "categories.html"));
+// });
 
 app.get("/account", (req, res) => {
   res.sendFile(path.join(viewsDir, "account.html"));

@@ -10,8 +10,6 @@ class AHeader extends HTMLElement {
                         <h1 class="logo-text">Home</h1>
                     </a>
                 </li>
-                <li><a href="/transactions">Transactions</a></li>
-                <li><a href="/categories">Categories</a></li>
             </ul>
             <ul class="nav-right">
                 <li>
